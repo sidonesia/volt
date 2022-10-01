@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 # use the same APPNAME in stop-pytavia-web.sh
 APPNAME=PYTAVIA
-HOST=localhost
+HOST=0.0.0.0
 PORT=49000
 
 # ./start-pytavia-web.sh production 

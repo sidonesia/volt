@@ -110,69 +110,148 @@ def get_db_table_paths(db):
 # Define the models/collections here for the mongo db
 db = {
     # SYSTEM TABLES WITH _sys_, do not modify
-    "db_sys_resume_history"         : {
-        "resume_token"              : {},
-        "handler_name"              : "",
-        "collection"                : "",
-        "operation_type"            : "",
-        "database"                  : "",
-        "document_key"              : "",
-        "cluster_time"              : 0 ,
-        "rec_timestamp"             : "",
+    "db_sys_resume_history"             : {
+        "resume_token"                  : {},
+        "handler_name"                  : "",
+        "collection"                    : "",
+        "operation_type"                : "",
+        "database"                      : "",
+        "document_key"                  : "",
+        "cluster_time"                  : 0 ,
+        "rec_timestamp"                 : "",
     },
 
     # USER TABLES BELOW HERE, MODIFYABLE
 
-    "db_application_sys_log"          : {
-        "fk_app_id"                   : "",
-        "fk_user_id"                  : "",
-        "fk_app_user_id"              : "",
-        "status"                      : "",
-        "status_timestamp"            : "",
-        "updated_by"                  : "", 
-        "pkey"                        : "",
-        "misc"                        : {},
+    "db_application_sys_log"            : {
+        "fk_app_id"                     : "",
+        "fk_user_id"                    : "",
+        "fk_app_user_id"                : "",
+        "status"                        : "",
+        "status_timestamp"              : "",
+        "updated_by"                    : "", 
+        "pkey"                          : "",
+        "misc"                          : {},
+    },
+    # peak hours , off peak hours 
+    # switch to mains value 
+    "db_configuration"                  : {
+        "name"                          : "",
+        "value"                         : "",
+        "desc"                          : "",
+        "status"                        : "",
+        "misc"                          : {},
+        "data"                          : {},
+    },
+    "db_dashboard_rt"                   : {
+        "power_usage_out"               : 0 ,
+        "power_solar_panel_in"          : 0 ,
+        "power_ac_in"                   : 0 ,
+        "current_usage_out"             : 0 ,
+        "current_solar_panel_in"        : 0 ,
+        "current_ac_in"                 : 0 ,
+        "last_updated"                  : 0 ,
+        "battery_voltage"               : 0 ,
+        "battery_soc"                   : 0 ,
+        "year"                          : "",
+        "year_month"                    : "",
+        "year_month_day"                : "",
+        "misc_data"                     : {},
+    },
+    # AC charging
+    # switch from battery low voltage to higher voltage
+    # AC power usage | DC power usage switch
+    "db_system_status"                  : {
+        "equipment"                     : "",
+        "status"                        : "",
+        "analog_value"                  : 0 ,
+        "desc"                          : "",
+        "last_update_time"              : "",
+        "prev_status"                   : "",
+    }
+    "db_gen_raw_log"                    : {
+        "type"                          : ""
+        "year"                          : ""
+        "year_month"                    : "",
+        "year_month_date"               : "",
+        "year_month_date_hour"          : "",
+        "year_month_date_hour_minute"   : "",
+        "hour"                          : "",
+        "minute"                        : "",
+        "current"                       : 0 ,
+        "power"                         : 0 ,
+    },
+    "db_usage_raw_log"                  : {
+        "year"                          : ""
+        "year_month"                    : "",
+        "year_month_date"               : "",
+        "year_month_date_hour"          : "",
+        "year_month_date_hour_minute"   : "",
+        "hour"                          : "",
+        "minute"                        : "",
+        "current"                       : 0 ,
+        "voltage"                       : 0 ,
+        "shunt_voltage"                 : 0 ,
+        "power"                         : 0 ,
+    }
+    "db_usage_hourly_log"           : {
+        "year"                          : ""
+        "year_month"                    : "",
+        "year_month_date"               : "",
+        "year_month_date_hour"          : "",
+        "year_month_date_hour_minute"   : "",
+        "day"                           : "",
+        "hour"                          : "",
+        "minute"                        : "",
+        "avg_current"                   : 0 ,
+        "avg_shunt_voltage"             : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_power"                     : 0 ,
+        "reading_count"                 : 0 
+    },
+    "db_usage_daily_log"            : {
+        "year"                          : ""
+        "year_month"                    : "",
+        "year_month_date"               : "",
+        "day"                           : "",
+        "avg_current"                   : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_shunt_voltage"             : 0 ,
+        "total_power"                   : 0 ,
+        "reading_count"                 : 0 ,
+        "avg_current"                   : 0 ,
+        "avg_shunt_voltage"             : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_power"                     : 0 ,
+        "reading_count"                 : 0
+    },
+    "db_usage_monthly_log"          : {
+        "year"                          : ""
+        "year_month"                    : "",
+        "avg_current"                   : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_shunt_voltage"             : 0 ,
+        "avg_power"                     : 0 ,
+        "reading_count"                 : 0
+    },
+    "db_usage_yearly_log"           : {
+        "year"                          : ""
+        "avg_current"                   : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_shunt_voltage"             : 0 ,
+        "avg_power"                     : 0 ,
+        "reading_count"                 : 0
+    },
+    "db_solar_gen_daily_log"            : {
+        "solar_gen_channel"             : ""
+        "current"                       : "",
+        "voltage"
+    },
+    "db_solar_gen_monthly_log"          : {
+        "solar_gen_channel"             : ""
+    },
+    "db_solar_gen_yearly_log"           : {
+        "solar_gen_channel"             : ""
     },
    
 } 
-"""
-### New way to define tables -- required in using bulk_db_action.py
-### Samples below
-
-    "db_book"                       : {
-        "__db__readable__name__"    : "Book",           ### define a readable table name here -- this will be used for returning meaningful status codes in pytavia validations
-        "pkey"                      : "",               
-        "name"                      : "",               ### some fields
-        "fk_publisher"              : {                 ### 1:1 Relationship -- duplicate the publisher name -- notice the pattern of fk_fieldname. db_publisher -> fk_publisher
-            "pkey"                  : "",
-            "name"                  : "",               ### foreign key field name should be exactly the same to the origin table
-        },
-        "fk_author"                 : [{                ### 1:M Relationship -- same pattern from db_author to fk_author
-            "pkey"                  : "",
-            "name"                  : "",               ### same, field names should be exactly the same for the deduplication logic to work
-            "picture"               : ""                ### duplicates the db_author's picture as well so we won't have to have a separate query
-        }]
-    },
-
-    "db_publisher"                  : {                
-        "__db__readable__name__"    : "Publisher",      ### same, define a readable name for the table -- to be displayed on response messages / descriptions
-        "pkey"                      : "",               
-        "name"                      : "",               ### duplicated in db_book
-        "fk_book"                   : [{                ### 1:M Relationship
-            "pkey"                  : "",
-            "name"                  : ""                ### duplicates db_book's name to save a query
-        }]
-    },
-
-    "db_author"                     : {                 
-        "__db__readable__name__"    : "Author",         
-        "pkey"                      : "",               
-        "name"                      : "",
-        "picture"                   : "",               ### duplicated in db_book -- notice how the field names are exactly the same
-        "fk_book"                   : [{                ### 1:M Relationship
-            "pkey"                  : "",
-            "name"                  : ""                ### again, db_book's name is duplicated here
-        }]
-    }
-"""
-
