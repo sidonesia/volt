@@ -140,6 +140,8 @@ db = {
     },
     # peak hours , off peak hours 
     # switch to mains value 
+    # price of onpeak power 
+    # price of offpeak power
     "db_configuration"                  : {
         "name"                          : "",
         "value"                         : "",
