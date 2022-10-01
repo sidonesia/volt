@@ -47,9 +47,18 @@ app.db_update_context, app.db_table_fks = model.get_db_table_paths(model.db)
 ########################## CALLBACK API ###################################
 
 @app.route('/')
+@app.route('/user/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', active_nav = 'dashboard')
 
 @app.route('/user/login')
 def admin_login():
     return render_template('login.html')
+
+@app.route('/user/settings')
+def admin_settings():
+    return render_template('settings.html', active_nav = 'settings')
+
+@app.route('/user/history')
+def admin_history():
+    return render_template('history.html', active_nav = 'history')

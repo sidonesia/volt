@@ -61,6 +61,12 @@
     <script src="/static/lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
     <script src="/static/assets/js/dashforge.js"></script>
     <script src="/static/assets/js/dashforge.aside.js"></script>    
+    <script>
+      const activeNav = '{{ active_nav }}Menu'
+      $('[data-nav]').removeClass('active-nav')
+      $(`#${activeNav}`).addClass('active-nav')
+      console.log(activeNav);
+    </script>
     {% block scripts %}{% endblock %}   
   </body>
 </html>

@@ -1,6 +1,6 @@
 <aside class="aside aside-fixed">
     <div class="aside-header">
-      <a href="/dashboard" class="aside-logo img-logo">
+      <a href="/user/dashboard" class="aside-logo img-logo">
         <span class="font-weight-bold text-white tx-18">VOLTINDO</span>
       </a>
       <a href="" class="aside-menu-link">
@@ -12,23 +12,29 @@
       <ul class="nav nav-aside">
         <li class="nav-label mg-b-15">Menus</li>
         <li class="nav-item mg-y-6">
-          <a id="dashboardNav" href="" class="nav-link active-nav">
+          <a data-nav id="dashboardMenu" href="/" class="nav-link active-nav">
             <i data-feather="sidebar"></i>
             <span>Dashboard</span>
           </a>
         </li>
         <li class="nav-item mg-y-6">
-          <a id="dashboardNav" href="" class="nav-link">
+          <a data-nav id="batteryMenu" href="" class="nav-link">
             <i data-feather="battery"></i>
             <span>Battery health</span>
           </a>
         </li>
         <li class="nav-item mg-y-6">
-          <a id="dashboardNav" href="" class="nav-link">
+          <a data-nav id="historyMenu" href="/user/history" class="nav-link">
+            <i data-feather="clock"></i>
+            <span>History</span>
+          </a>
+        </li>
+        <li class="nav-item mg-y-6">
+          <a data-nav id="settingsMenu" href="/user/settings" class="nav-link">
             <i data-feather="settings"></i>
             <span>Settings</span>
           </a>
         </li>
       </ul>
     </div>
-  </aside>
+</aside>

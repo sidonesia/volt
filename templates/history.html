@@ -1,0 +1,148 @@
+{% extends '/core/base.html' %}
+
+{% block title %}History{% endblock %}
+
+{% block styles %}{% endblock %}
+
+{% block contents %}
+<div class="container pd-x-0">
+  <nav aria-label="breadcrumb" class="mg-b-10">
+    <ol class="breadcrumb breadcrumb-style1 mg-b-0">
+      <li class="breadcrumb-item active" aria-current="page">History</li>
+    </ol>
+  </nav>
+  <h3 class="font-weight-bold text-white">History</h3>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="bg-tertiary rounded-10 p-3 m-2">
+        <span class="d-block op-5 mb-3">Label 1</span>
+        <canvas id="myChart" width="400" height="400"></canvas>
+      </div>                                         
+    </div>                 
+    <div class="col-md-6">
+      <div class="bg-tertiary rounded-10 p-3 m-2">
+        <span class="d-block op-5 mb-3">Label 2</span> 
+        <canvas id="myChart2" width="400" height="400"></canvas>
+      </div>                                         
+    </div>                 
+    <div class="col-md-6">
+      <div class="bg-tertiary rounded-10 p-3 m-2">
+        <span class="d-block op-5 mb-3">Label 3</span>
+        <canvas id="myChart3" width="400" height="400"></canvas>
+      </div>                                         
+    </div>                 
+    <div class="col-md-6">
+      <div class="bg-tertiary rounded-10 p-3 m-2">
+        <span class="d-block op-5 mb-3">Label 4</span>
+        <canvas id="myChart4" width="400" height="400"></canvas>
+      </div>                                         
+    </div>                 
+    <div class="col-md-6">
+      <div class="bg-tertiary rounded-10 p-3 m-2">
+        <span class="d-block op-5 mb-3">Label 5</span>
+        <canvas id="myChart5" width="400" height="400"></canvas>
+      </div>                                         
+    </div>                 
+    <div class="col-md-6">
+      <div class="bg-tertiary rounded-10 p-3 m-2">
+        <span class="d-block op-5 mb-3">Label 6</span>
+        <canvas id="myChart6" width="400" height="400"></canvas>
+      </div>                                         
+    </div>                                               
+  </div>
+  <!-- row -->
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/lib/chartjs-new/chart.min.js"></script>
+<script>
+  const chart1 = document.getElementById('myChart')
+  const chart2 = document.getElementById('myChart2')
+  const chart3 = document.getElementById('myChart3')
+  const chart4 = document.getElementById('myChart4')
+  const chart5 = document.getElementById('myChart5')
+  const chart6 = document.getElementById('myChart6')
+
+
+  const myData = [{
+    label: 'Test label',
+    data: [12, 19, 3, 5, 2, 3],
+    backgroundColor: [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)'
+    ],
+    borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ]                  
+  }]
+
+  function makeChart(type, data, canvas) {
+    const ctx = canvas.getContext('2d');
+    let showXY = false
+    type === 'pie' ? showXY = false : showXY = true        
+
+    const myChart = new Chart(ctx, {
+      type: type,
+      data: {
+          labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+          datasets: data
+      },
+      options: {        
+        responsive: true,
+        scales: {  
+            x: {      
+                display: showXY,              
+                ticks: {
+                    color: "white",                                        
+                    stepSize: 3,
+                    beginAtZero: true
+                },
+                grid: {
+                    display: false,                                        
+                }
+            },
+            y: {
+                display: showXY,              
+                beginAtZero: true,                        
+                title: {
+                    display: true,                        
+                    color: 'white',                    
+                },
+                ticks: {
+                    color: "white",                                                                             
+                    beginAtZero: true                    
+                },
+                grid: {                    
+                    color: '#5C6196',
+                    borderDash: [20, 4],
+                    borderColor: '#5C6196',
+                    borderWidth: 3
+                }          
+            },
+            
+            
+        },        
+        
+    }
+    });
+  }
+
+  makeChart('pie', myData, chart1)
+  makeChart('line', myData, chart2)
+  makeChart('bar', myData, chart3)
+  makeChart('pie', myData, chart4)
+  makeChart('line', myData, chart5)
+  makeChart('bar', myData, chart6)      
+
+</script>    
+{% endblock %}
