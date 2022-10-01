@@ -122,7 +122,12 @@ db = {
     },
 
     # USER TABLES BELOW HERE, MODIFYABLE
-
+    "db_user"                           : {
+        "username"                      : "",
+        "password"                      : "",
+        "role"                          : "",
+        "last_login"                    : 0 ,
+    },
     "db_application_sys_log"            : {
         "fk_app_id"                     : "",
         "fk_user_id"                    : "",
