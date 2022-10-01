@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/static/assets/img/fav/battery-charging.svg" type="image/x-icon" />
+    <title>Voltindo | {% block title %}{% endblock %}</title>
+    <!-- vendor css -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <link href="/static/lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <link href="/static/lib/ionicons/css/ionicons.min.css" rel="stylesheet" />
+    <!-- DashForge CSS -->
+    {% block styles %} {% endblock %}
+    <link rel="stylesheet" href="/static/assets/css/dashforge.css" />
+    <link rel="stylesheet" href="/static/lib/animate.css/animate.min.css" />
+    <link rel="stylesheet" href="/static/css/custom.css" />
+    <!-- some additional css here -->
+  </head>
+  <body>
+    <div class="loader">
+      <div class="load-wrapp">
+        <div class="load-3">
+          <div class="line"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+      </div>
+    </div>
+    <div class="body">
+
+      {% include 'core/sidebar.html' %}
+
+      <div class="content ht-100v pd-0">
+        <div class="content-header">
+          <div class="d-flex align-items-center justify-content-end w-100">
+            <div class="">
+              <a href="" class="text-white mg-x-8">
+                <i data-feather="user" class="mg-r-3"></i>
+                Admin
+              </a>
+            </div>
+            <a href="/user/login" class="mg-x-8 text-danger"><i data-feather="log-out" class="mg-r-3"></i>Logout</a>
+          </div>
+        </div>
+
+        <div class="content-body">
+          {% block contents %}            
+          {% endblock %}
+          <!-- container -->
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/lib/jquery/jquery.min.js"></script>
+    <script src="/static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/lib/feather-icons/feather.min.js"></script>
+    <script src="/static/lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="/static/assets/js/dashforge.js"></script>
+    <script src="/static/assets/js/dashforge.aside.js"></script>    
+    {% block scripts %}{% endblock %}   
+  </body>
+</html>

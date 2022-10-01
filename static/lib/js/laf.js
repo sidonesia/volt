@@ -1,0 +1,1 @@
+function copy(o){const t=$(o).prev().val();copyToClipboard(t);showAToast("Copied!")}function showOptions(o){const t=$(o).next();t.toggleClass("show")}$(document).on("click",".rm",function(o){var t=confirm("Are you sure you want to delete ?");if(!t){o.preventDefault()}else{$("#form2").attr("action","/process/affiliate/delete?uid="+$(this).data().uid);$("#form2").submit()}});

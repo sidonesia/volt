@@ -1,0 +1,1 @@
+MicroModal.init();const msgContainer=document.querySelector("[data-msg-container]");if(isb==1){const eL=document.getElementById("msg_template").content.cloneNode(true);eL.querySelector("img").src="/static/assets/imgs/feather-ico/flag_warning.svg";eL.querySelector("h3").innerText="Update successful!";msgContainer.append(eL);MicroModal.show("modal-msg")}
