@@ -159,7 +159,6 @@ class usage_process:
             "0000"
         )
         try:
-
             pass
         except:
             exception = traceback.format_exc()
