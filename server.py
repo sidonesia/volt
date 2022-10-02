@@ -45,6 +45,8 @@ app.secret_key  = config.G_FLASK_SECRET
 app.db_update_context, app.db_table_fks = model.get_db_table_paths(model.db)
 
 ########################## CALLBACK API ###################################
+
+
 ########################## HTML PAGES   ##########################
 
 @app.route('/user/dashboard' , method=["GET"])
@@ -69,23 +71,23 @@ def admin_history():
 #### AUTH PROCESSORS
 
 @app.route('/proc/auth-login',method=["POST"])
-def auth_proc(self, params):
+def auth_proc():
     pass
 
 @app.route('/proc/register-user',method=["GET"])
-def register(self, params):
+def register():
     pass
 
 #### SETTINGS PROCESSORS
 
 @app.route('/proc/settings-add',method=["POST"])
-def settings_add(self, params):
+def settings_add():
     pass
 
 @app.route('/proc/settings-del',method=["POST"])
-def settings_del(self, params):
+def settings_del():
     pass
 
 @app.route('/proc/settings-edit',method=["POST"])
-def settings_edit(self, params):
+def settings_edit():
     pass
