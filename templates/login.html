@@ -24,7 +24,7 @@
         </div>
         <div class="bg-tertiary pd-x-20 pd-y-30 rounded mg-x-auto shadow" style="max-width: 396px;">
             <form action="/user/dashboard" method="POST">
-                <input type="hidden" name="_csrf_token" value="">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="wd-100p">
                     <h3 class="tx-color-01 mg-b-5 text-white">Sign In</h3>
                     <p class="tx-color-03 tx-16 mg-b-40 text-white">Welcome back! Please signin to continue.</p>                    

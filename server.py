@@ -49,7 +49,7 @@ app.db_update_context, app.db_table_fks = model.get_db_table_paths(model.db)
 
 ########################## HTML PAGES   ##########################
 
-@app.route('/user/dashboard' , methods=["GET"])
+@app.route('/user/dashboard' , methods=["GET","POST"])
 def dashboard():
     return render_template('dashboard.html', active_nav = 'dashboard')
 
