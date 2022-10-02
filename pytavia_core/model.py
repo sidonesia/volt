@@ -180,7 +180,7 @@ db = {
         "desc"                          : "",
         "last_update_time"              : "",
         "prev_status"                   : "",
-    }
+    },
     # keep data for just 1 month
     "db_gen_raw_log"                    : {
         "type"                          : "",
@@ -210,7 +210,7 @@ db = {
         "off_peak_cost"                 : 0 ,
         "on_peak_cost"                  : 0 ,
         "nominal_cost"                  : 0 ,
-    }
+    },
     "db_usage_hourly_log"           : {
         "year"                          : "",
         "year_month"                    : "",
