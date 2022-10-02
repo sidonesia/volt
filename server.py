@@ -45,20 +45,49 @@ app.secret_key  = config.G_FLASK_SECRET
 app.db_update_context, app.db_table_fks = model.get_db_table_paths(model.db)
 
 ########################## CALLBACK API ###################################
+########################## HTML PAGES   ##########################
 
-@app.route('/')
-@app.route('/user/dashboard')
+@app.route('/user/dashboard' , method=["GET"])
 def dashboard():
     return render_template('dashboard.html', active_nav = 'dashboard')
 
-@app.route('/user/login')
+@app.route('/' , method=["GET"])
+@app.route('/user/login' , method=["GET"])
 def admin_login():
     return render_template('login.html')
 
-@app.route('/user/settings')
+@app.route('/user/settings' , method=["GET"])
 def admin_settings():
     return render_template('settings.html', active_nav = 'settings')
 
-@app.route('/user/history')
+@app.route('/user/history' , method=["GET"])
 def admin_history():
     return render_template('history.html', active_nav = 'history')
+
+
+########################## PROCESSORS ##########################
+
+
+#### AUTH PROCESSORS
+
+@app.route('/proc/auth-login',method=["POST"])
+def auth_proc(self, params):
+    pass
+
+@app.route('/proc/register-user',method=["GET"])
+def register(self, params):
+    pass
+
+#### SETTINGS PROCESSORS
+
+@app.route('/proc/settings-add',method=["POST"])
+def settings_add(self, params):
+    pass
+
+@app.route('/proc/settings-del',method=["POST"])
+def settings_del(self, params):
+    pass
+
+@app.route('/proc/settings-edit',method=["POST"])
+def settings_edit(self, params):
+    pass
