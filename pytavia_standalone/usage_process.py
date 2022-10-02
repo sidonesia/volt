@@ -123,8 +123,8 @@ class usage_process:
                 # However:
                 #   When the reading is below 10 amps , the power, voltage and amps matches 
                 #   the battery meter. Don't know why so hard coding this for now
-                #   need to see if there is a generalised reason why this is the case
-                #   ANNOYING :(
+                #   need to see if there is a generalised reason why this is happening
+                #       ANNOYING but this will do for now :(
                 #
                 if amp_avg > amps_diff_threshold:
                     amp_avg = amp_avg - amps_diff_constant 
@@ -159,6 +159,7 @@ class usage_process:
             "0000"
         )
         try:
+
             pass
         except:
             exception = traceback.format_exc()
