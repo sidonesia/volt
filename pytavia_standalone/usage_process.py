@@ -10,6 +10,7 @@ import  pymongo
 import  sys
 import  urllib.parse
 import  base64
+import  datetime
 
 import  logging
 import  traceback
@@ -130,7 +131,7 @@ class usage_process:
                     amp_avg = amp_avg - amps_diff_constant 
                 # end if
                 power_avg       = voltage_avg * amp_avg
-                write_response  = self.write({
+                write_response  = self.write_usage({
                     "power"         : power_avg,
                     "voltage"       : voltage_avg,
                     "shunt_voltage" : shunt_voltage_avg,
@@ -152,14 +153,118 @@ class usage_process:
         return response
     # end def
 
-    def write(self, params):
+    def time_gen(self, params):
+        response = helper.response_msg(
+            "TIME_GEN_SUCCESS",
+            "TIME GEN SUCCESS", {},
+            "0000"
+        )
+        try:
+            epoch_time               = int(time.time() * 1000)
+            today                    = datetime.datetime.now()
+            year                     = today.strftime("%Y")
+            year_month               = today.strftime("%Y_%m")
+            year_month_date          = today.strftime("%Y_%m_%d")
+            year_month_date_hour     = today.strftime("%Y_%m_%d_%H")
+            year_month_date_hour_min = today.strftime("%Y_%m_%d_%H_%M")
+            hour                     = today.strftime("%H")
+            minute                   = today.strftime("%M")
+
+            response.put("data" , {
+                "epoch_time"                : epoch_time,
+                "year"                      : year,
+                "year_month"                : year_month,
+                "year_month_date"           : year_month_date,
+                "year_month_date_hour"      : year_month_date_hour,
+                "year_month_date_hour_min"  : year_month_date_hour_min,
+                "hour"                      : hour,
+                "minute"                    : minute,
+            })
+        except:
+            exception = traceback.format_exc()
+            self.webapp.logger.debug( exception )
+            response.put( "status_code" , "9999" )
+            response.put( "status"      , "WRITE_SENSOR_FAILED" )
+            response.put( "desc"        , "WRITE SENSOR FAILED " + str( exception )  )
+        # end try
+        return response
+    # end def
+
+    def write_usage(self, params):
         response = helper.response_msg(
             "WRITE_SENSOR_SUCCESS",
             "WRITE SENSOR SUCCESS", {},
             "0000"
         )
+        power         = params["power"]
+        voltage       = params["voltage"]
+        shunt_voltage = params["shunt_voltage"]
+        current       = params["current"]
+
+        power         = float( power ) 
+        voltage       = float( voltage ) 
+        shunt_voltage = float( shunt_voltage ) 
+        current       = float( current ) 
         try:
-            pass
+            tm_response              = self.time_gen({})
+            tm_data                  = tm_response.get("data")
+            year                     = tm_data["year"]
+            year_month               = tm_data["year_month"]
+            year_month_date          = tm_data["year_month_date"]
+            year_month_date_hour     = tm_data["year_month_date_hour"]
+            year_month_date_hour_min = tm_data["year_month_date_hour_min"]
+            hour                     = tm_data["hour"]
+            minute                   = tm_data["minute"]
+
+            off_peak_conf = self.mgdDB.db_config.find_one({
+                "value" : "OFF_PEAK_RATE"
+            })
+            on_peak_conf = self.mgdDB.db_config.find_one({
+                "value" : "ON_PEAK_RATE"
+            })
+            high_battery_voltage_rec = self.mgdDB.db_config.find_one({
+                "value" : "HIGH_BATTERY_VOLTAGE"
+            })
+            low_battery_voltage_rec = self.mgdDB.db_config.find_one({
+                "value" : "LOW_BATTERY_VOLTAGE"
+            })
+            off_peak_cost        = off_peak_conf["data"]["cost"]
+            on_peak_cost         = on_peak_conf ["data"]["cost"]
+            low_battery_voltage  = low_battery_voltage_rec  ["data"]["voltage"]
+            high_battery_voltage = hight_battery_voltage_rec["data"]["voltage"]
+
+            # update the raw data
+            mdl_usage_raw_log = database.new( self.mgdDB , "db_usage_raw_log" )
+            mdl_usage_raw_log.put( "year" , year )
+            mdl_usage_raw_log.put( "year_month" , year_month )
+            mdl_usage_raw_log.put( "year_month_date" , year_month_date )
+            mdl_usage_raw_log.put( "year_month_date_hour" , year_month_date_hour )
+            mdl_usage_raw_log.put( "year_month_date_hour_minute" , year_month_date_hour_minute )
+            mdl_usage_raw_log.put( "hour" , hour )
+            mdl_usage_raw_log.put( "minute" , minute )
+            mdl_usage_raw_log.put( "current" , current )
+            mdl_usage_raw_log.put( "voltage" , voltage )
+            mdl_usage_raw_log.put( "shunt_voltage" , shunt_voltage )
+            mdl_usage_raw_log.put( "power" , power )
+            mdl_usage_raw_log.put( "off_peak_cost" , off_peak_cost )
+            mdl_usage_raw_log.put( "on_peak_cost" , on_peak_cost )
+
+            # update the realtime table data
+            battery_soc = float(( float(voltage) / float(high_battery_voltage))) * 100
+            battery_soc = round( battery_soc, 3 )
+            self.mgdDB.db_rt_dashboard.update(
+                {   "pkey" : "" }, 
+                {
+                    "power_usage_out"   : power ,
+                    "current_usage_out" : current ,
+                    "battery_voltage"   : voltage ,
+                    "battery_soc"       : battery_soc ,
+                    "year"              : year ,
+                    "year_month"        : year_month ,
+                    "year_month_date"   : year_month_date ,
+                }
+            )
+
         except:
             exception = traceback.format_exc()
             self.webapp.logger.debug( exception )

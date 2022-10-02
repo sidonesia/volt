@@ -52,7 +52,6 @@ def dashboard():
     return render_template('dashboard.html', active_nav = 'dashboard')
 
 @app.route('/' , method=["GET"])
-@app.route('/user/login' , method=["GET"])
 def admin_login():
     return render_template('login.html')
 
@@ -66,7 +65,6 @@ def admin_history():
 
 
 ########################## PROCESSORS ##########################
-
 
 #### AUTH PROCESSORS
 

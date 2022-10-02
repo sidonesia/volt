@@ -167,7 +167,7 @@ db = {
         "battery_soc"                   : 0 ,
         "year"                          : "",
         "year_month"                    : "",
-        "year_month_day"                : "",
+        "year_month_date"               : "",
         "misc_data"                     : {},
     },
     # AC charging
