@@ -183,8 +183,8 @@ db = {
     }
     # keep data for just 1 month
     "db_gen_raw_log"                    : {
-        "type"                          : ""
-        "year"                          : ""
+        "type"                          : "",
+        "year"                          : "",
         "year_month"                    : "",
         "year_month_date"               : "",
         "year_month_date_hour"          : "",
@@ -196,7 +196,7 @@ db = {
     },
     # keep raw data for just 1 month
     "db_usage_raw_log"                  : {
-        "year"                          : ""
+        "year"                          : "",
         "year_month"                    : "",
         "year_month_date"               : "",
         "year_month_date_hour"          : "",
@@ -212,7 +212,7 @@ db = {
         "nominal_cost"                  : 0 ,
     }
     "db_usage_hourly_log"           : {
-        "year"                          : ""
+        "year"                          : "",
         "year_month"                    : "",
         "year_month_date"               : "",
         "year_month_date_hour"          : "",
@@ -230,7 +230,7 @@ db = {
         "total_nominal_cost"            : 0 ,
     },
     "db_usage_daily_log"                : {
-        "year"                          : ""
+        "year"                          : "",
         "year_month"                    : "",
         "year_month_date"               : "",
         "day"                           : "",
@@ -249,7 +249,7 @@ db = {
         "total_nominal_cost"            : 0 ,
     },
     "db_usage_monthly_log"          : {
-        "year"                          : ""
+        "year"                          : "",
         "year_month"                    : "",
         "avg_current"                   : 0 ,
         "avg_voltage"                   : 0 ,
@@ -261,7 +261,7 @@ db = {
         "total_nominal_cost"            : 0 ,
     },
     "db_usage_yearly_log"           : {
-        "year"                          : ""
+        "year"                          : "",
         "avg_current"                   : 0 ,
         "avg_voltage"                   : 0 ,
         "avg_shunt_voltage"             : 0 ,
@@ -272,7 +272,7 @@ db = {
         "total_nominal_cost"            : 0 ,
     },
     "db_solar_gen_hourly_log"           : {
-        "year"                          : ""
+        "year"                          : "",
         "year_month"                    : "",
         "year_month_date"               : "",
         "year_month_date_hour"          : "",

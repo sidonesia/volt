@@ -264,7 +264,6 @@ class usage_process:
                     "year_month_date"   : year_month_date ,
                 }
             )
-
         except:
             exception = traceback.format_exc()
             self.webapp.logger.debug( exception )
