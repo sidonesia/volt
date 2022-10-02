@@ -49,19 +49,19 @@ app.db_update_context, app.db_table_fks = model.get_db_table_paths(model.db)
 
 ########################## HTML PAGES   ##########################
 
-@app.route('/user/dashboard' , method=["GET"])
+@app.route('/user/dashboard' , methods=["GET"])
 def dashboard():
     return render_template('dashboard.html', active_nav = 'dashboard')
 
-@app.route('/' , method=["GET"])
+@app.route('/' , methods=["GET"])
 def admin_login():
     return render_template('login.html')
 
-@app.route('/user/settings' , method=["GET"])
+@app.route('/user/settings' , methods=["GET"])
 def admin_settings():
     return render_template('settings.html', active_nav = 'settings')
 
-@app.route('/user/history' , method=["GET"])
+@app.route('/user/history' , methods=["GET"])
 def admin_history():
     return render_template('history.html', active_nav = 'history')
 
@@ -70,24 +70,24 @@ def admin_history():
 
 #### AUTH PROCESSORS
 
-@app.route('/proc/auth-login',method=["POST"])
+@app.route('/proc/auth-login',methods=["POST"])
 def auth_proc():
     pass
 
-@app.route('/proc/register-user',method=["GET"])
+@app.route('/proc/register-user',methods=["GET"])
 def register():
     pass
 
 #### SETTINGS PROCESSORS
 
-@app.route('/proc/settings-add',method=["POST"])
+@app.route('/proc/settings-add',methods=["POST"])
 def settings_add():
     pass
 
-@app.route('/proc/settings-del',method=["POST"])
+@app.route('/proc/settings-del',methods=["POST"])
 def settings_del():
     pass
 
-@app.route('/proc/settings-edit',method=["POST"])
+@app.route('/proc/settings-edit',methods=["POST"])
 def settings_edit():
     pass
