@@ -142,7 +142,12 @@ db = {
     # switch to mains value 
     # price of onpeak power 
     # price of offpeak power
-    "db_configuration"                  : {
+    # data capture resolution
+    # capture delay
+    # shunt_ohms for a given shunt
+    # max amps for given shunt
+    # max shunt voltage loss for given shunt
+    "db_config"                         : {
         "name"                          : "",
         "value"                         : "",
         "desc"                          : "",
@@ -150,7 +155,7 @@ db = {
         "misc"                          : {},
         "data"                          : {},
     },
-    "db_dashboard_rt"                   : {
+    "db_rt_dashboard"                   : {
         "power_usage_out"               : 0 ,
         "power_solar_panel_in"          : 0 ,
         "power_ac_in"                   : 0 ,
@@ -168,7 +173,7 @@ db = {
     # AC charging
     # switch from battery low voltage to higher voltage
     # AC power usage | DC power usage switch
-    "db_system_status"                  : {
+    "db_rt_system_status"               : {
         "equipment"                     : "",
         "status"                        : "",
         "analog_value"                  : 0 ,
@@ -176,6 +181,7 @@ db = {
         "last_update_time"              : "",
         "prev_status"                   : "",
     }
+    # keep data for just 1 month
     "db_gen_raw_log"                    : {
         "type"                          : ""
         "year"                          : ""
@@ -188,6 +194,7 @@ db = {
         "current"                       : 0 ,
         "power"                         : 0 ,
     },
+    # keep raw data for just 1 month
     "db_usage_raw_log"                  : {
         "year"                          : ""
         "year_month"                    : "",
@@ -200,6 +207,9 @@ db = {
         "voltage"                       : 0 ,
         "shunt_voltage"                 : 0 ,
         "power"                         : 0 ,
+        "off_peak_cost"                 : 0 ,
+        "on_peak_cost"                  : 0 ,
+        "nominal_cost"                  : 0 ,
     }
     "db_usage_hourly_log"           : {
         "year"                          : ""
@@ -214,9 +224,12 @@ db = {
         "avg_shunt_voltage"             : 0 ,
         "avg_voltage"                   : 0 ,
         "avg_power"                     : 0 ,
-        "reading_count"                 : 0 
+        "reading_count"                 : 0 ,
+        "total_off_peak_cost"           : 0 ,
+        "total_on_peak_cost"            : 0 ,
+        "total_nominal_cost"            : 0 ,
     },
-    "db_usage_daily_log"            : {
+    "db_usage_daily_log"                : {
         "year"                          : ""
         "year_month"                    : "",
         "year_month_date"               : "",
@@ -230,7 +243,10 @@ db = {
         "avg_shunt_voltage"             : 0 ,
         "avg_voltage"                   : 0 ,
         "avg_power"                     : 0 ,
-        "reading_count"                 : 0
+        "reading_count"                 : 0 ,
+        "total_off_peak_cost"           : 0 ,
+        "total_on_peak_cost"            : 0 ,
+        "total_nominal_cost"            : 0 ,
     },
     "db_usage_monthly_log"          : {
         "year"                          : ""
@@ -239,7 +255,10 @@ db = {
         "avg_voltage"                   : 0 ,
         "avg_shunt_voltage"             : 0 ,
         "avg_power"                     : 0 ,
-        "reading_count"                 : 0
+        "reading_count"                 : 0 ,
+        "total_off_peak_cost"           : 0 ,
+        "total_on_peak_cost"            : 0 ,
+        "total_nominal_cost"            : 0 ,
     },
     "db_usage_yearly_log"           : {
         "year"                          : ""
@@ -247,18 +266,49 @@ db = {
         "avg_voltage"                   : 0 ,
         "avg_shunt_voltage"             : 0 ,
         "avg_power"                     : 0 ,
-        "reading_count"                 : 0
+        "reading_count"                 : 0 ,
+        "total_off_peak_cost"           : 0 ,
+        "total_on_peak_cost"            : 0 ,
+        "total_nominal_cost"            : 0 ,
+    },
+    "db_solar_gen_hourly_log"           : {
+        "year"                          : ""
+        "year_month"                    : "",
+        "year_month_date"               : "",
+        "year_month_date_hour"          : "",
+        "year_month_date_hour_minute"   : "",
+        "day"                           : "",
+        "hour"                          : "",
+        "minute"                        : "",
+        "solar_gen_channel"             : "", # CHARGE CONTROLLER 1 / 2 / 3 etc
+        "avg_current"                   : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_power"                     : 0 ,
     },
     "db_solar_gen_daily_log"            : {
-        "solar_gen_channel"             : ""
-        "current"                       : "",
-        "voltage"
+        "solar_gen_channel"             : "",
+        "year"                          : "",
+        "year_month"                    : "",
+        "year_month_date"               : "",
+        "day"                           : "",
+        "avg_current"                   : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_power"                     : 0 ,
     },
     "db_solar_gen_monthly_log"          : {
-        "solar_gen_channel"             : ""
+        "solar_gen_channel"             : "",
+        "year"                          : "",
+        "year_month"                    : "",
+        "avg_current"                   : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_power"                     : 0 ,
     },
     "db_solar_gen_yearly_log"           : {
-        "solar_gen_channel"             : ""
+        "solar_gen_channel"             : "",
+        "year"                          : "",
+        "avg_current"                   : 0 ,
+        "avg_voltage"                   : 0 ,
+        "avg_power"                     : 0 ,
     },
    
 } 
