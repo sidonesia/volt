@@ -169,6 +169,7 @@ class usage_process:
             year_month_date_hour_min = today.strftime("%Y_%m_%d_%H_%M")
             hour                     = today.strftime("%H")
             minute                   = today.strftime("%M")
+            day                      = today.strftime("%A").upper()
 
             response.put("data" , {
                 "epoch_time"                : epoch_time,
@@ -179,7 +180,128 @@ class usage_process:
                 "year_month_date_hour_min"  : year_month_date_hour_min,
                 "hour"                      : hour,
                 "minute"                    : minute,
+                "day"                       : day,
             })
+        except:
+            exception = traceback.format_exc()
+            self.webapp.logger.debug( exception )
+            response.put( "status_code" , "9999" )
+            response.put( "status"      , "WRITE_SENSOR_FAILED" )
+            response.put( "desc"        , "WRITE SENSOR FAILED " + str( exception )  )
+        # end try
+        return response
+    # end def
+
+    def write_analytics( self, params ):
+        response = helper.response_msg(
+            "WRITE_HOUR_SENSOR_SUCCESS",
+            "WRITE HOUR SENSOR SUCCESS", {},
+            "0000"
+        )
+        power               = params["power"]
+        voltage             = params["voltage"]
+        shunt_voltage       = params["shunt_voltage"]
+        current             = params["current"]
+
+        metric_scope        = params["metric_scope"]
+        metric_scope_value  = params["metric_scope_value"]
+        metric_table        = params["metric_table"]
+
+        power               = float( power )
+        voltage             = float( voltage )
+        shunt_voltage       = float( shunt_voltage )
+        current             = float( current )
+        try:
+            tm_response              = self.time_gen({})
+            tm_data                  = tm_response.get("data")
+            year                     = tm_data["year"]
+            year_month               = tm_data["year_month"]
+            year_month_date          = tm_data["year_month_date"]
+            year_month_date_hour     = tm_data["year_month_date_hour"]
+            year_month_date_hour_min = tm_data["year_month_date_hour_min"]
+            hour                     = tm_data["hour"]
+            minute                   = tm_data["minute"]
+            day                      = tm_data["day"]
+            metric_log_rec           = self.mgdDB[metric_table].find_one({
+                metric_scope : metric_scope_value
+            })
+
+            off_peak_conf = self.mgdDB.db_config.find_one({
+                "value" : "OFF_PEAK_RATE"
+            })
+            on_peak_conf = self.mgdDB.db_config.find_one({
+                "value" : "ON_PEAK_RATE"
+            })
+            off_peak_cost  = off_peak_conf["data"]["cost"]
+            off_peak_start = off_peak_conf["data"]["start"]
+            off_peak_end   = off_peak_conf["data"]["end"]
+
+            on_peak_cost   = on_peak_conf ["data"]["cost"]
+            on_peak_start  = on_peak_conf ["data"]["start"]
+            on_peak_end    = on_peak_conf ["data"]["end"]
+
+            if metric_log_rec == None:
+            total_nominal_cost = 0
+                if hour >= off_peak_start  and hour < off_peak_end:
+                    total_nominal_cost = float(off_peak_cost) * ( power / 1000 ) # per kwh
+                else:
+                    total_nominal_cost = float(on_peak_cost) * ( power / 1000 ) # per kwh
+                # end if
+                mdl_hourly_log = database.new( self.mgdDB, "db_usage_hourly_log" )
+                mdl_hourly_log.put ( "year" , year )
+                mdl_hourly_log.put ( "year_month" , year_month )
+                mdl_hourly_log.put ( "year_month_date" , year_month_date )
+                mdl_hourly_log.put ( "year_month_date_hour" , year_month_date_hour)
+                mdl_hourly_log.put ( "year_month_date_hour_minute" , year_month_date_hour_min )
+                mdl_hourly_log.put ( "day" , day )
+                mdl_hourly_log.put ( "hour" , hour )
+                mdl_hourly_log.put ( "minute" , minute )
+                mdl_hourly_log.put ( "avg_current" , current )
+                mdl_hourly_log.put ( "avg_shunt_voltage" , shunt_voltage )
+                mdl_hourly_log.put ( "avg_voltage" , voltage )
+                mdl_hourly_log.put ( "avg_power" , power )
+                mdl_hourly_log.put ( "reading_count" , 1 )
+                mdl_hourly_log.put ( "total_off_peak_cost" , off_peak_cost )
+                mdl_hourly_log.put ( "total_on_peak_cost" , on_peak_cost )
+                mdl_hourly_log.put ( "total_nominal_cost" , total_nominal_cost )
+
+                response.put( "data" , {
+                    "action_data" : mdl_hourly_log,
+                    "action_type" : "INSERT"
+                })
+            else:
+                avg_current         = metric_log_rec["avg_current"]
+                avg_shunt_voltage   = metric_log_rec["avg_shunt_voltage"]
+                avg_voltage         = metric_log_rec["avg_voltage"]
+                avg_power           = metric_log_rec["avg_power"]
+                reading_count       = metric_log_rec["reading_count"]
+                total_nominal_cost  = ""
+
+                reading_count       = reading_count + 1
+                avg_current         = ((avg_current + current)) / reading_count 
+                avg_shunt_voltage   = ((avg_shunt_voltage + shunt_voltage)) / reading_count 
+                avg_voltage         = ((avg_voltage + voltage)) / reading_count 
+                avg_power           = ((avg_power + power)) / reading_count 
+                total_nominal_cost  = 
+
+                if hour >= off_peak_start  and hour < off_peak_end:
+                    total_nominal_cost = float(off_peak_cost) * ( avg_power / 1000 ) # per kwh
+                else:
+                    total_nominal_cost = float(on_peak_cost) * ( avg_power / 1000 ) # per kwh
+                # end if
+                update_data = {
+                    "avg_current" : avg_current ,
+                    "avg_shunt_voltage" : avg_shunt_voltage ,
+                    "avg_voltage" : avg_voltage ,
+                    "avg_power" : avg_power ,
+                    "reading_count" : reading_count ,
+                    "total_nominal_cost" : total_nominal_cost
+                }
+                response.put( "data" , {
+                    "action_data" : update_data,
+                    "action_type" : "UPDATE"
+                })
+            # end if
         except:
             exception = traceback.format_exc()
             self.webapp.logger.debug( exception )
@@ -233,6 +355,10 @@ class usage_process:
             low_battery_voltage  = low_battery_voltage_rec  ["data"]["voltage"]
             high_battery_voltage = hight_battery_voltage_rec["data"]["voltage"]
 
+            # ---------------------------------------------
+            # SETUP THE BULK MULTI OBJECT HERE
+            # ---------------------------------------------
+
             # update the raw data
             mdl_usage_raw_log = database.new( self.mgdDB , "db_usage_raw_log" )
             mdl_usage_raw_log.put( "year" , year )
@@ -249,7 +375,48 @@ class usage_process:
             mdl_usage_raw_log.put( "off_peak_cost" , off_peak_cost )
             mdl_usage_raw_log.put( "on_peak_cost" , on_peak_cost )
 
+            hour_analytic_resp = self.write_analytics({
+                "power"             : power,
+                "voltage"           : voltage,
+                "shunt_voltage"     : shunt_voltage,
+                "current"           : current,
+                "metric_scope_value": year_month_date_hour,
+                "metric_scope"      : "year_month_date_hour",
+                "metric_scope_table": "db_usage_hourly_log"
+            })
+            daily_analytic_resp = self.write_analytics({
+                "power"             : power,
+                "voltage"           : voltage,
+                "shunt_voltage"     : shunt_voltage,
+                "current"           : current,
+                "metric_scope_value": year_month_date,
+                "metric_scope"      : "year_month_date",
+                "metric_scope_table": "db_usage_daily_log"
+            })
+            monthly_analytic_resp = self.write_analytics({
+                "power"             : power,
+                "voltage"           : voltage,
+                "shunt_voltage"     : shunt_voltage,
+                "current"           : current,
+                "metric_scope_value": year_month,
+                "metric_scope"      : "year_month",
+                "metric_scope_table": "db_usage_monthly_log"
+            })
+            yearly_analytic_resp = self.write_analytics({
+                "power"             : power,
+                "voltage"           : voltage,
+                "shunt_voltage"     : shunt_voltage,
+                "current"           : current,
+                "metric_scope_value": year,
+                "metric_scope"      : "year",
+                "metric_scope_table": "db_usage_yearly_log"
+            })
+
+            # ------------------------------------------------------------
+            # HERE WE GET ALL THE DATA AND WE DO THE BULK MULTI UPDATE
+            # ------------------------------------------------------------
             # update the realtime table data
+
             battery_soc = float(( float(voltage) / float(high_battery_voltage))) * 100
             battery_soc = round( battery_soc, 3 )
             self.mgdDB.db_rt_dashboard.update(
