@@ -279,9 +279,9 @@ class usage_process:
 
                 reading_count       = reading_count + 1
                 avg_current         = ((avg_current + current)) / reading_count 
-                avg_shunt_voltage   = ((avg_shunt_voltage + shunt_voltage)) / reading_count 
                 avg_voltage         = ((avg_voltage + voltage)) / reading_count 
-                avg_power           = ((avg_power + power)) / reading_count 
+                avg_power           = ((avg_power + power))     / reading_count 
+                avg_shunt_voltage   = ((avg_shunt_voltage + shunt_voltage)) / reading_count 
                 total_nominal_cost  = 
 
                 if hour >= off_peak_start  and hour < off_peak_end:
@@ -358,7 +358,11 @@ class usage_process:
             # ---------------------------------------------
             # SETUP THE BULK MULTI OBJECT HERE
             # ---------------------------------------------
-
+            db_handle  = database.get_database( config.mainDB )
+            bulk_multi = bulk_db_multi.bulk_db_multi({
+                "db_handle" : db_handle,
+                "app"       : None
+            })            
             # update the raw data
             mdl_usage_raw_log = database.new( self.mgdDB , "db_usage_raw_log" )
             mdl_usage_raw_log.put( "year" , year )
@@ -375,6 +379,7 @@ class usage_process:
             mdl_usage_raw_log.put( "off_peak_cost" , off_peak_cost )
             mdl_usage_raw_log.put( "on_peak_cost" , on_peak_cost )
 
+            # handle the hourly analytics here 
             hour_analytic_resp = self.write_analytics({
                 "power"             : power,
                 "voltage"           : voltage,
@@ -384,6 +389,26 @@ class usage_process:
                 "metric_scope"      : "year_month_date_hour",
                 "metric_scope_table": "db_usage_hourly_log"
             })
+            hour_resp        = hour_analytic_resp.get("data")
+            hour_action_type = hour_resp["action_type"]
+            if hour_action_type == "INSERT":
+                mdl_usage_hourly_log = hour_resp["action_data"]
+                bulk_multi.add_action(
+                    bulk_db_multi.ACTION_INSERT ,
+                    mdl_usage_hourly_log
+                )
+            else:
+                update_query = hour_resp["action_data"]
+                bulk_multi.add_action(
+                    bulk_multi.ACTION_UPDATE ,
+                    "db_usage_hourly_log",
+                    update_query
+
+                )
+            # end if
+            #
+            # handle the daily anayltics here 
+            #
             daily_analytic_resp = self.write_analytics({
                 "power"             : power,
                 "voltage"           : voltage,
@@ -393,6 +418,26 @@ class usage_process:
                 "metric_scope"      : "year_month_date",
                 "metric_scope_table": "db_usage_daily_log"
             })
+            daily_resp        = daily_analytic_resp.get("data")
+            daily_action_type = daily_resp["action_type"]
+            if daily_action_type == "INSERT":
+                mdl_usage_daily_log = daily_resp["action_data"]
+                bulk_multi.add_action(
+                    bulk_db_multi.ACTION_INSERT ,
+                    mdl_usage_daily_log
+                )
+            else:
+                update_query = hour_resp["action_data"]
+                bulk_multi.add_action(
+                    bulk_multi.ACTION_UPDATE ,
+                    "db_usage_daily_log",
+                    update_query
+
+                )
+            # end if
+            #
+            # handle the monthly anayltics here 
+            #
             monthly_analytic_resp = self.write_analytics({
                 "power"             : power,
                 "voltage"           : voltage,
@@ -402,6 +447,25 @@ class usage_process:
                 "metric_scope"      : "year_month",
                 "metric_scope_table": "db_usage_monthly_log"
             })
+            monthly_resp = monthly_analytic_resp.get("data")
+            monthly_action_type = monthly_resp["action_type"]
+            if monthly_action_type == "INSERT":
+                mdl_usage_monthly_log = monthly_resp["action_data"]
+                bulk_multi.add_action(
+                    bulk_db_multi.ACTION_INSERT ,
+                    mdl_usage_monthly_log
+                )
+            else:
+                update_query = monthly_resp["action_data"]
+                bulk_multi.add_action(
+                    bulk_multi.ACTION_UPDATE ,
+                    "db_usage_monthly_log",
+                    update_query
+                )
+            # end if
+            #
+            # handle the yearly anayltics here 
+            #
             yearly_analytic_resp = self.write_analytics({
                 "power"             : power,
                 "voltage"           : voltage,
@@ -411,12 +475,25 @@ class usage_process:
                 "metric_scope"      : "year",
                 "metric_scope_table": "db_usage_yearly_log"
             })
-
-            # ------------------------------------------------------------
-            # HERE WE GET ALL THE DATA AND WE DO THE BULK MULTI UPDATE
-            # ------------------------------------------------------------
+            yearly_resp = yearly_analytic_resp.get("data")
+            yearly_action_type = yearly_resp["action_type"]
+            if yearly_action_type == "INSERT":
+                mdl_usage_yearly_log = yearly_resp["action_data"]
+                bulk_multi.add_action(
+                    bulk_db_multi.ACTION_INSERT ,
+                    mdl_usage_yearly_log
+                )
+            else:
+                update_query = yearly_resp["action_data"]
+                bulk_multi.add_action(
+                    bulk_multi.ACTION_UPDATE ,
+                    "db_usage_yearly_log",
+                    update_query
+                )
+            # end if
+            #
             # update the realtime table data
-
+            #
             battery_soc = float(( float(voltage) / float(high_battery_voltage))) * 100
             battery_soc = round( battery_soc, 3 )
             self.mgdDB.db_rt_dashboard.update(
@@ -431,6 +508,9 @@ class usage_process:
                     "year_month_date"   : year_month_date ,
                 }
             )
+
+            # execute the insert and updates
+            bulk_multi.execute({})
         except:
             exception = traceback.format_exc()
             self.webapp.logger.debug( exception )
