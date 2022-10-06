@@ -241,7 +241,7 @@ class usage_process:
             on_peak_end    = on_peak_conf ["data"]["end"]
 
             if metric_log_rec == None:
-            total_nominal_cost = 0
+                total_nominal_cost = 0
                 if hour >= off_peak_start  and hour < off_peak_end:
                     total_nominal_cost = float(off_peak_cost) * ( power / 1000 ) # per kwh
                 else:
@@ -290,12 +290,12 @@ class usage_process:
                     total_nominal_cost = float(on_peak_cost) * ( avg_power / 1000 ) # per kwh
                 # end if
                 update_data = {
-                    "avg_current" : avg_current ,
+                    "avg_current"       : avg_current ,
                     "avg_shunt_voltage" : avg_shunt_voltage ,
-                    "avg_voltage" : avg_voltage ,
-                    "avg_power" : avg_power ,
-                    "reading_count" : reading_count ,
-                    "total_nominal_cost" : total_nominal_cost
+                    "avg_voltage"       : avg_voltage ,
+                    "avg_power"         : avg_power ,
+                    "reading_count"     : reading_count ,
+                    "total_nominal_cost": total_nominal_cost
                 }
                 response.put( "data" , {
                     "action_data" : update_data,
@@ -524,5 +524,5 @@ class usage_process:
 
 
 if __name__ == "__main__":
-    usage_process.usage_process().execute( {} )
+    usage_process.usage_process({"device_address" : "0x40"}).execute( {} )
 # end if

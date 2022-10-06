@@ -72,6 +72,14 @@ def _cmp_pin(params):
 def _get_passwd_hash(params):
     wallet_id         = params["id"]
     passwd            = params["password" ]
+    password          = passwd + wallet_id
+    password_hash     = hashlib.sha256(password.encode('ascii')).hexdigest()
+    return password_hash
+# end def
+
+def _get_passwd_hash_old(params):
+    wallet_id         = params["id"]
+    passwd            = params["password" ]
     length_wallet_id  = len( wallet_id )
     wallet_id_suffix  = wallet_id[
         length_wallet_id - config.G_WALLET_ID_SUFFIX : length_wallet_id
