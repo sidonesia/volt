@@ -17,16 +17,18 @@ import  traceback
 import  time
 import  numpy as np
 
-sys.path.append("pytavia_core"    )
-sys.path.append("pytavia_settings")
-sys.path.append("pytavia_stdlib"  )
-sys.path.append("pytavia_storage" )
-sys.path.append("pytavia_modules" )
+sys.path.append("../pytavia_core"    )
+sys.path.append("../pytavia_settings")
+sys.path.append("../pytavia_stdlib"  )
+sys.path.append("../pytavia_storage" )
+sys.path.append("../pytavia_modules" )
+sys.path.append("../")
 
 from pytavia_core import pytavia_event_handler
 from pytavia_core import database
 from pytavia_core import config
 from pytavia_core import bulk_db_multi
+from pytavia_core import helper
 
 class usage_process:
 
@@ -49,6 +51,11 @@ class usage_process:
         self.max_expected_amps  = config_rec["data"]["max_amps"]
 
         # create the ina device 
+        print ( "-------------------------------------" )
+        print ( self.shunt_ohms )
+        print ( self.max_expected_amps )
+        print ( self.device_address )
+        print ( "-------------------------------------" )
         self.ina_device = INA219(
             self.shunt_ohms,
             self.max_expected_amps,
@@ -93,7 +100,7 @@ class usage_process:
                 for sample in range(0, read_samples ):
                     shunt_voltage        = self.ina_device.shunt_voltage()
                     shunt_voltage_scaled = (shunt_voltage * amps_per_milli_volt / config.G_MILLI_UNIT )
-                    voltage              = self.ina_device.voltage() + shunt_voltage_scaled
+                    voltage              = self.ina_device.voltage() #+ shunt_voltage_scaled
                     current              = self.ina_device.current()
 
                     voltage       = round( voltage , 3 )
@@ -105,7 +112,7 @@ class usage_process:
                     if ( current > 0 ) and ( shunt_voltage > 0 ):
                         watts = voltage * current
                         power_list.append  ( watts   )
-                        amp_list.append    ( current )
+                        current_list.append( current )
                         voltage_list.append( voltage )
                         shunt_voltage_list.append( shunt_voltage )
                     # end if
@@ -115,7 +122,7 @@ class usage_process:
                 # get all the collected data and process
                 voltage_avg         = (sum(voltage_list) / len( voltage_list ))
                 shunt_voltage_avg   = (sum(shunt_voltage_list) / len( shunt_voltage_list ))
-                amp_avg             = (sum(amp_list) / len(amp_list) / config.G_MILLI_UNIT)
+                amp_avg             = (sum(current_list) / len(current_list) / config.G_MILLI_UNIT)
                 # 
                 # Some notes:
                 #   When the amps drawn is greater then 10amps the shunt & amps reading 
@@ -142,10 +149,15 @@ class usage_process:
                     # write to the error database 
                     pass
                 # end if
+                print ( "" )
+                print ( "voltage: " + str(voltage_avg) ) 
+                print ( "shunt: " + str(shunt_voltage_avg) ) 
+                print ( "current: " + str(amp_avg) ) 
+                print ( "watts: " + str( power_avg ) )
             # end while
         except:
             exception = traceback.format_exc()
-            self.webapp.logger.debug( exception )
+            print( exception )
             response.put( "status_code" , "9999" )
             response.put( "status"      , "READ_SENSOR_FAILED" )
             response.put( "desc"        , "READ SENSOR FAILED " + str( exception )  )
@@ -171,6 +183,9 @@ class usage_process:
             minute                   = today.strftime("%M")
             day                      = today.strftime("%A").upper()
 
+            hour                     = int( hour ) 
+            minute                   = int( minute ) 
+
             response.put("data" , {
                 "epoch_time"                : epoch_time,
                 "year"                      : year,
@@ -184,7 +199,7 @@ class usage_process:
             })
         except:
             exception = traceback.format_exc()
-            self.webapp.logger.debug( exception )
+            print( exception )
             response.put( "status_code" , "9999" )
             response.put( "status"      , "WRITE_SENSOR_FAILED" )
             response.put( "desc"        , "WRITE SENSOR FAILED " + str( exception )  )
@@ -205,7 +220,7 @@ class usage_process:
 
         metric_scope        = params["metric_scope"]
         metric_scope_value  = params["metric_scope_value"]
-        metric_table        = params["metric_table"]
+        metric_table        = params["metric_scope_table"]
 
         power               = float( power )
         voltage             = float( voltage )
@@ -232,13 +247,13 @@ class usage_process:
             on_peak_conf = self.mgdDB.db_config.find_one({
                 "value" : "ON_PEAK_RATE"
             })
-            off_peak_cost  = off_peak_conf["data"]["cost"]
-            off_peak_start = off_peak_conf["data"]["start"]
-            off_peak_end   = off_peak_conf["data"]["end"]
+            off_peak_cost  = float(off_peak_conf["data"]["cost"])
+            off_peak_start = float(off_peak_conf["data"]["start"])
+            off_peak_end   = float(off_peak_conf["data"]["end"])
 
-            on_peak_cost   = on_peak_conf ["data"]["cost"]
-            on_peak_start  = on_peak_conf ["data"]["start"]
-            on_peak_end    = on_peak_conf ["data"]["end"]
+            on_peak_cost   = float(on_peak_conf ["data"]["cost"])
+            on_peak_start  = float(on_peak_conf ["data"]["start"])
+            on_peak_end    = float(on_peak_conf ["data"]["end"])
 
             total_nominal_cost = 0
             if metric_log_rec == None:
@@ -247,7 +262,7 @@ class usage_process:
                 else:
                     total_nominal_cost = float(on_peak_cost) * ( power / 1000 ) # per kwh
                 # end if
-                mdl_hourly_log = database.new( self.mgdDB, "db_usage_hourly_log" )
+                mdl_hourly_log = database.new( self.mgdDB, metric_table )
                 mdl_hourly_log.put ( "year" , year )
                 mdl_hourly_log.put ( "year_month" , year_month )
                 mdl_hourly_log.put ( "year_month_date" , year_month_date )
@@ -264,6 +279,10 @@ class usage_process:
                 mdl_hourly_log.put ( "total_off_peak_cost" , off_peak_cost )
                 mdl_hourly_log.put ( "total_on_peak_cost" , on_peak_cost )
                 mdl_hourly_log.put ( "total_nominal_cost" , total_nominal_cost )
+                mdl_hourly_log.put ( "sum_current" , current )
+                mdl_hourly_log.put ( "sum_voltage" , voltage )
+                mdl_hourly_log.put ( "sum_shunt_voltage" , shunt_voltage )
+                mdl_hourly_log.put ( "sum_power" , power )
 
                 response.put( "data" , {
                     "action_data" : mdl_hourly_log,
@@ -276,33 +295,48 @@ class usage_process:
                 avg_power           = metric_log_rec["avg_power"]
                 reading_count       = metric_log_rec["reading_count"]
 
+                sum_current         = metric_log_rec["sum_current"]
+                sum_voltage         = metric_log_rec["sum_voltage"]
+                sum_shunt_voltage   = metric_log_rec["sum_shunt_voltage"]
+                sum_power           = metric_log_rec["sum_power"]
+
+                sum_current         = current       + sum_current
+                sum_voltage         = voltage       + sum_voltage
+                sum_shunt_voltage   = shunt_voltage + sum_shunt_voltage
+                sum_power           = power         + sum_power
+
                 reading_count       = reading_count + 1
-                avg_current         = ((avg_current + current)) / reading_count 
-                avg_voltage         = ((avg_voltage + voltage)) / reading_count 
-                avg_power           = ((avg_power + power))     / reading_count 
-                avg_shunt_voltage   = ((avg_shunt_voltage + shunt_voltage)) / reading_count 
+                avg_current         = ((sum_current))       / reading_count 
+                avg_voltage         = ((sum_voltage))       / reading_count 
+                avg_power           = ((sum_power))         / reading_count 
+                avg_shunt_voltage   = ((sum_shunt_voltage)) / reading_count 
 
                 if hour >= off_peak_start  and hour < off_peak_end:
                     total_nominal_cost = float(off_peak_cost) * ( avg_power / 1000 ) # per kwh
                 else:
                     total_nominal_cost = float(on_peak_cost) * ( avg_power / 1000 ) # per kwh
                 # end if
-                update_data = {
+                update_data = { "$set" : {
                     "avg_current"       : avg_current ,
                     "avg_shunt_voltage" : avg_shunt_voltage ,
                     "avg_voltage"       : avg_voltage ,
                     "avg_power"         : avg_power ,
                     "reading_count"     : reading_count ,
-                    "total_nominal_cost": total_nominal_cost
-                }
+                    "total_nominal_cost": total_nominal_cost,
+                    "sum_current"       : sum_current,
+                    "sum_voltage"       : sum_voltage,
+                    "sum_shunt_voltage" : sum_shunt_voltage,
+                    "sum_power"         : sum_power
+                }}
                 response.put( "data" , {
-                    "action_data" : update_data,
-                    "action_type" : "UPDATE"
+                    "action_data"  : update_data,
+                    "action_query" : { metric_scope : metric_scope_value },
+                    "action_type"  : "UPDATE"
                 })
             # end if
         except:
             exception = traceback.format_exc()
-            self.webapp.logger.debug( exception )
+            print( exception )
             response.put( "status_code" , "9999" )
             response.put( "status"      , "WRITE_SENSOR_FAILED" )
             response.put( "desc"        , "WRITE SENSOR FAILED " + str( exception )  )
@@ -351,7 +385,7 @@ class usage_process:
             off_peak_cost        = off_peak_conf["data"]["cost"]
             on_peak_cost         = on_peak_conf ["data"]["cost"]
             low_battery_voltage  = low_battery_voltage_rec  ["data"]["voltage"]
-            high_battery_voltage = hight_battery_voltage_rec["data"]["voltage"]
+            high_battery_voltage = high_battery_voltage_rec["data"]["voltage"]
 
             # ---------------------------------------------
             # SETUP THE BULK MULTI OBJECT HERE
@@ -367,7 +401,7 @@ class usage_process:
             mdl_usage_raw_log.put( "year_month" , year_month )
             mdl_usage_raw_log.put( "year_month_date" , year_month_date )
             mdl_usage_raw_log.put( "year_month_date_hour" , year_month_date_hour )
-            mdl_usage_raw_log.put( "year_month_date_hour_minute" , year_month_date_hour_minute )
+            mdl_usage_raw_log.put( "year_month_date_hour_minute" , year_month_date_hour_min )
             mdl_usage_raw_log.put( "hour" , hour )
             mdl_usage_raw_log.put( "minute" , minute )
             mdl_usage_raw_log.put( "current" , current )
@@ -397,9 +431,11 @@ class usage_process:
                 )
             else:
                 update_query = hour_resp["action_data"]
+                action_query = hour_resp["action_query"]
                 bulk_multi.add_action(
-                    bulk_multi.ACTION_UPDATE ,
+                    bulk_db_multi.ACTION_UPDATE ,
                     "db_usage_hourly_log",
+                    action_query,
                     update_query
 
                 )
@@ -425,10 +461,12 @@ class usage_process:
                     mdl_usage_daily_log
                 )
             else:
-                update_query = hour_resp["action_data"]
+                update_query = daily_resp["action_data"]
+                action_query = daily_resp["action_query"]
                 bulk_multi.add_action(
-                    bulk_multi.ACTION_UPDATE ,
+                    bulk_db_multi.ACTION_UPDATE ,
                     "db_usage_daily_log",
+                    action_query,
                     update_query
 
                 )
@@ -454,10 +492,12 @@ class usage_process:
                     mdl_usage_monthly_log
                 )
             else:
+                action_query = monthly_resp["action_query"]
                 update_query = monthly_resp["action_data"]
                 bulk_multi.add_action(
-                    bulk_multi.ACTION_UPDATE ,
+                    bulk_db_multi.ACTION_UPDATE ,
                     "db_usage_monthly_log",
+                    action_query,
                     update_query
                 )
             # end if
@@ -483,20 +523,26 @@ class usage_process:
                 )
             else:
                 update_query = yearly_resp["action_data"]
+                action_query = yearly_resp["action_query"]
                 bulk_multi.add_action(
-                    bulk_multi.ACTION_UPDATE ,
+                    bulk_db_multi.ACTION_UPDATE ,
                     "db_usage_yearly_log",
+                    action_query,
                     update_query
                 )
             # end if
+            bulk_multi.add_action(
+                bulk_db_multi.ACTION_INSERT ,
+                mdl_usage_raw_log
+            )
             #
             # update the realtime table data
             #
             battery_soc = float(( float(voltage) / float(high_battery_voltage))) * 100
             battery_soc = round( battery_soc, 3 )
-            self.mgdDB.db_rt_dashboard.update(
-                {   "pkey" : "" }, 
-                {
+            self.mgdDB.db_rt_dashboard.update_many(
+                {}, 
+                { "$set" : {
                     "power_usage_out"   : power ,
                     "current_usage_out" : current ,
                     "battery_voltage"   : voltage ,
@@ -504,14 +550,14 @@ class usage_process:
                     "year"              : year ,
                     "year_month"        : year_month ,
                     "year_month_date"   : year_month_date ,
-                }
+                }}
             )
 
             # execute the insert and updates
             bulk_multi.execute({})
         except:
             exception = traceback.format_exc()
-            self.webapp.logger.debug( exception )
+            print( exception )
             response.put( "status_code" , "9999" )
             response.put( "status"      , "WRITE_SENSOR_FAILED" )
             response.put( "desc"        , "WRITE SENSOR FAILED " + str( exception )  )
@@ -522,5 +568,5 @@ class usage_process:
 
 
 if __name__ == "__main__":
-    usage_process.usage_process({"device_address" : "0x40"}).execute( {} )
+    usage_process({"device_address" : 0x40}).execute( {} )
 # end if

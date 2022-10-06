@@ -8,7 +8,7 @@ import config
 import random
 
 from bson.objectid import ObjectId
-from pytavia_stdlib import utils
+#from pytavia_stdlib import utils
 
 db_conn_completed = False
 
@@ -35,6 +35,22 @@ def connect_db():
 
 def get_database(database_name):
     return db_active_con[database_name]
+# end def
+
+def _get_current_timestamp(time_format = None):
+    if time_format == None:
+        try:
+            time_format = config.G_STR_TIME_FORMAT
+        except:
+            time_format = "%Y-%m-%d %H:%M:%S"
+
+    curr_time = int(time.time())
+    timestamp = curr_time * 1000
+    timestamp_str = time.strftime(
+        time_format, time.localtime(curr_time)
+    )
+
+    return timestamp, timestamp_str
 # end def
 
 def get_db_conn(db_conn):
@@ -69,7 +85,7 @@ def get_record(db_table):
     
     db_fk_settings(record)
 
-    timestamp, timestamp_str = utils._get_current_timestamp()
+    timestamp, timestamp_str = _get_current_timestamp()
     record["rec_timestamp"    ] = timestamp
     record["rec_timestamp_str"] = timestamp_str
 
@@ -117,7 +133,7 @@ def new_record(db_handle, db_table, db_table_fks, add_modified_field = config.G_
 
     record["__db__name__"     ] = db_table
 
-    timestamp, timestamp_str    = utils._get_current_timestamp()
+    timestamp, timestamp_str    = _get_current_timestamp()
     record["rec_timestamp"    ] = timestamp
     record["rec_timestamp_str"] = timestamp_str
     
@@ -146,7 +162,7 @@ def new(db_handle, db_table, add_modified_field = config.G_RECORD_ADD_MODIFIED_T
 
     record["__db__name__"     ] = db_table
 
-    timestamp, timestamp_str    = utils._get_current_timestamp()
+    timestamp, timestamp_str    = _get_current_timestamp()
     record["rec_timestamp"    ] = timestamp
     record["rec_timestamp_str"] = timestamp_str
     
