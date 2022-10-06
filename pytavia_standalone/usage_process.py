@@ -240,8 +240,8 @@ class usage_process:
             on_peak_start  = on_peak_conf ["data"]["start"]
             on_peak_end    = on_peak_conf ["data"]["end"]
 
+            total_nominal_cost = 0
             if metric_log_rec == None:
-                total_nominal_cost = 0
                 if hour >= off_peak_start  and hour < off_peak_end:
                     total_nominal_cost = float(off_peak_cost) * ( power / 1000 ) # per kwh
                 else:
@@ -275,14 +275,12 @@ class usage_process:
                 avg_voltage         = metric_log_rec["avg_voltage"]
                 avg_power           = metric_log_rec["avg_power"]
                 reading_count       = metric_log_rec["reading_count"]
-                total_nominal_cost  = ""
 
                 reading_count       = reading_count + 1
                 avg_current         = ((avg_current + current)) / reading_count 
                 avg_voltage         = ((avg_voltage + voltage)) / reading_count 
                 avg_power           = ((avg_power + power))     / reading_count 
                 avg_shunt_voltage   = ((avg_shunt_voltage + shunt_voltage)) / reading_count 
-                total_nominal_cost  = 
 
                 if hour >= off_peak_start  and hour < off_peak_end:
                     total_nominal_cost = float(off_peak_cost) * ( avg_power / 1000 ) # per kwh
