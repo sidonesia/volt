@@ -56,7 +56,7 @@ class config_add:
             mdl_db_config.put( "status" , status ) 
             mdl_db_config.put( "misc"   , misc   ) 
             mdl_db_config.put( "data"   , data   ) 
-            mdl_db_config.insert({})
+            mdl_db_config.insert()
             response.put( "data" , {
                 "config" : mdl_db_config.get()
             })
