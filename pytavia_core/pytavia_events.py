@@ -63,7 +63,7 @@ class event_proc(threading.Thread):
             "handler_name" : handler_name
         })
         if resume_history_rec != None:
-            self.dispatchDB.db_sys_resume_history.update(
+            self.dispatchDB.db_sys_resume_history.update_one(
                 {"collection" : collection_name, "handler_name" : handler_name},
                 {"$set"       : {
                     "resume_token"   : resume_token,

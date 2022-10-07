@@ -359,6 +359,11 @@ class usage_process:
         voltage       = float( voltage ) 
         shunt_voltage = float( shunt_voltage ) 
         current       = float( current ) 
+
+        power           = round( power , 2 )
+        voltage         = round( voltage , 2 )
+        shunt_voltage   = round( shunt_voltage , 2 )
+        current         = round( current , 2 )
         try:
             tm_response              = self.time_gen({})
             tm_data                  = tm_response.get("data")
@@ -540,8 +545,8 @@ class usage_process:
             #
             battery_soc = float(( float(voltage) / float(high_battery_voltage))) * 100
             battery_soc = round( battery_soc, 3 )
-            self.mgdDB.db_rt_dashboard.update_many(
-                {}, 
+            self.mgdDB.db_rt_dashboard.update_one(
+                { "name" :  "DASHBOARD"}, 
                 { "$set" : {
                     "power_usage_out"   : power ,
                     "current_usage_out" : current ,

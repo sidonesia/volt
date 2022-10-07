@@ -1,5 +1,7 @@
 import sys
 import traceback
+import datetime
+import time
 
 sys.path.append("pytavia_core"    )
 sys.path.append("pytavia_modules" )
@@ -23,6 +25,55 @@ class view_dashboard:
         pass
     # end def
 
+    def get_dashboard(self, params):
+        response = helper.response_msg(
+            "DASHBOARD_SUCCESS",
+            "DASHBOARD SUCCESS", {},
+            "0000"
+        )
+        try:
+            rt_dashboard_rec = self.mgdDB.db_rt_dashboard.find_one({
+                "name" : "DASHBOARD"
+            })
+            del rt_dashboard_rec["_id"]
+            response.put( "data" , {
+                "dashboard_rec" : rt_dashboard_rec
+            })
+        except:
+            print(traceback.format_exc())
+            response.put( "status"      ,  "DASHBOARD_FAILED" )
+            response.put( "desc"        ,  "GENERAL ERROR" )
+            response.put( "status_code" ,  "9999" )
+        # end try
+        return response
+    # end def
+
+    def get_hourly_usage(self, params):
+        response = helper.response_msg(
+            "DASHBOARD_SUCCESS",
+            "DASHBOARD SUCCESS", {},
+            "0000"
+        )
+        try:
+            today                = datetime.datetime.now()
+            year_month_date_hour = today.strftime("%Y_%m_%d_%H")
+            hourly_log_rec       = self.mgdDB.db_usage_hourly_log.find_one({
+                "year_month_date_hour" : year_month_date_hour
+            })
+            del hourly_log_rec["_id"]
+            response.put("data", {
+                "hourly_log_rec" : hourly_log_rec
+            })
+        except:
+            print(traceback.format_exc())
+            response.put( "status"      ,  "DASHBOARD_FAILED" )
+            response.put( "desc"        ,  "GENERAL ERROR" )
+            response.put( "status_code" ,  "9999" )
+        # end try
+        return response
+    # end def
+
+
     def html(self, params):
         response = helper.response_msg(
             "VIEW_HTML_SUCCESS",
@@ -30,8 +81,17 @@ class view_dashboard:
             "0000"
         )
         try:
-            template_html = render_template(
-                'dashboard.html'
+            resp_dashboard       = self.get_dashboard( params )
+            dashboard_rec        = resp_dashboard.get("data")["dashboard_rec"]
+
+            resp_hourly          = self.get_hourly_usage( params )
+            hourly_log_rec       = resp_hourly.get("data")["hourly_log_rec"]
+            avg_power_hourly     = round( hourly_log_rec["avg_power"] , 2 )
+
+            template_html        = render_template(
+                'dashboard.html',
+                dashboard_item   = dashboard_rec,
+                avg_power_hourly = avg_power_hourly
             )
             response.put( "data" , {
                 "html" : template_html

@@ -11,7 +11,7 @@
       <li class="breadcrumb-item active" aria-current="page">Home</li>
     </ol>
   </nav>
-  <h3 class="font-weight-bold text-white">Usage this month</h3>
+  <h3 class="font-weight-bold text-white">Hourly Metrics</h3>
   <div class="row">
     <div class="col-md-9 ">
       <div class="bg-tertiary rounded-10 py-5">
@@ -45,7 +45,8 @@
             <div class="icon-container gap-1">
               <div class="con-division">
                 <span class="d-block op-5">Home Usage</span>
-                <h3 class="font-weight-bold text-white">20.9 kWh</span>                                            
+		<h3 class="font-weight-bold text-white">
+			<span id="home_usage_id">{{avg_power_hourly}}</span> kWh                                            
               </div>
               <svg class="con-division" id="home-icon" width="114" height="114" viewBox="0 0 114 114" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle class="border-1" cx="57" cy="57" r="57" fill="url(#paint0_linear_1_23)"/>
@@ -70,7 +71,9 @@
                 
               <div class="con-division" >
                 <span class="d-block op-5" onclick="test()">Battery</span>
-                <h3 data-charge-span class="animated infinite flash slower font-weight-bold text-white percentage-span">61%</span>                                            
+                <h3 data-charge-span class="animated infinite flash slower font-weight-bold text-white percentage-span">
+			<span id="id_battery_soc">{{dashboard_item.battery_soc}}</span>%
+		</span>                                            
               </div>
             </div>
           </div>        
@@ -89,32 +92,6 @@
     </div>    
     <div class="col-md-3">
       <div class="d-flex gap-1 flex-wrap bg-tertiary rounded-10 p-3 mt-md-0 mt-3">                  
-        <div class="d-flex align-items-center gap-1">                   
-          <svg class="rotate-90" width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle data-percentage="30" data-min="185" data-max="300" style="--percentage: 80;--bg:#EB714A" class="border-2" cx="37.5" cy="37.5" r="30" fill="#40385B"/>
-            <circle cx="37.5" cy="37.5" r="28" fill="#40385B"/>
-            <g clip-path="url(#clip0_10_48)">
-            <path d="M38 44.25C41.4518 44.25 44.25 41.4518 44.25 38C44.25 34.5482 41.4518 31.75 38 31.75C34.5482 31.75 31.75 34.5482 31.75 38C31.75 41.4518 34.5482 44.25 38 44.25Z" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M38 24.25V26.75" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M38 49.25V51.75" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M28.275 28.275L30.05 30.05" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M45.95 45.95L47.725 47.725" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M24.25 38H26.75" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M49.25 38H51.75" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M28.275 47.725L30.05 45.95" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M45.95 30.05L47.725 28.275" stroke="#EB714A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-            <defs>
-            <clipPath id="clip0_10_48">
-            <rect width="30" height="30" fill="white" transform="translate(23 23)"/>
-            </clipPath>
-            </defs>
-            </svg>
-          <div class="">
-            <span class="d-block tx-24 font-weight-bold">33.50</span>
-            <span class="d-block op-5">kWh</span>
-          </div>
-        </div>   
         <div class="d-flex align-items-center gap-1">                    
           <svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle data-percentage="50" data-min="185" data-max="300"  style="--percentage: 70;--bg:#00C2FF" class="rotate-90 border-2" cx="37.5" cy="37.5" r="30" fill="#303E6D"/>
@@ -129,7 +106,11 @@
           
             
           <div class="">
-            <span class="d-block tx-24 font-weight-bold">33.50</span>
+            <span class="d-block tx-24 font-weight-bold">
+		  <span class="d-block tx-24 font-weight-bold">
+			  <span id="ampere_image_id">{{dashboard_item.current_usage_out}}</span> A
+		  </span>
+	    </span>
             <span class="d-block op-5">Amp. hour</span>
           </div>
         </div>                                                                                                                                                                                                   
@@ -141,15 +122,25 @@
             <span class="d-block op-5">Temp.</span>
           </div>
           <div class="col-6">
-            <span class="d-block tx-24 font-weight-bold">15.1</span>
+            <span class="d-block tx-24 font-weight-bold">
+		  <span class="d-block tx-24 font-weight-bold">
+			  <span id="ampere_id">{{dashboard_item.battery_voltage}}</span> V
+		  </span>
+	    </span>
             <span class="d-block op-5">Volts</span>
           </div>
           <div class="col-6 mt-3">
-            <span class="d-block tx-24 font-weight-bold">9.2</span>
+		  <span class="d-block tx-24 font-weight-bold">
+			  <span id="ampere_id">{{dashboard_item.current_usage_out}}</span> A
+		  </span>
             <span class="d-block op-5">Ampere</span>
           </div>
           <div class="col-6 mt-3">
-            <span class="d-block tx-24 font-weight-bold">432.4</span>
+            <span class="d-block tx-24 font-weight-bold">
+		  <span class="d-block tx-24 font-weight-bold">
+			  <span id="power_id">{{dashboard_item.power_usage_out}}</span> W
+		  </span>
+	    </span>
             <span class="d-block op-5">Watt</span>
           </div>
         </div>                                                                                                                                                                                                

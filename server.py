@@ -4,6 +4,7 @@ import pymongo
 import sys
 import urllib.parse
 import base64
+import threading
 
 sys.path.append("pytavia_core"    ) 
 sys.path.append("pytavia_settings") 
@@ -14,22 +15,25 @@ sys.path.append("pytavia_modules/rest_api_controller")
 sys.path.append("pytavia_modules/user") 
 sys.path.append("pytavia_modules/configuration") 
 sys.path.append("pytavia_modules/view") 
+sys.path.append("pytavia_modules/event_handler") 
 
-# adding comments
-from pytavia_stdlib  import utils
-from pytavia_core    import database 
-from pytavia_core    import config 
-from pytavia_core    import model
+from pytavia_stdlib      import utils
+from pytavia_core        import database 
+from pytavia_core        import config 
+from pytavia_core        import model
+from pytavia_core        import pytavia_events
 
-from pytavia_stdlib  import idgen 
-from pytavia_stdlib  import server_lib 
+from pytavia_stdlib      import idgen 
+from pytavia_stdlib      import server_lib 
 
 from rest_api_controller import module1 
 
-from user   import register_proc
-from user   import auth_proc
+from user                import register_proc
+from user                import auth_proc
 
-from configuration import config_add
+from configuration       import config_add
+from event_loop_executor import event_loop_proc
+from event_handler       import customer_evt_handler
 
 from view import view_config_add
 from view import view_login
@@ -49,13 +53,55 @@ from flask import flash
 
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf.csrf import CSRFError
+
+########################## CREATOR FUNCTION ###################################
+
+listenerThread  = threading.Thread()
+pool_time       = 5
+
+def main_app():
+    app = Flask( __name__, config.G_STATIC_URL_PATH )
+
+    def interrupt():
+        global listenerThread
+        listenerThread.cancel()
+    # end def
+
+    def listen_action():
+        print ("listen_action: EXECUTE")
+        pe = pytavia_events.pytavia_events({})
+        pe.register_handler({
+            "handler_name"       : "DASHBOARD_RT_ACCESS",
+            "collection"         : "db_rt_dashboard",
+            "handler"            : customer_evt_handler.customer_evt_handler({}),
+            "query_filter"       : []
+        })
+
+        print ("event_loop: start action")
+        pe.event_loop({
+            "event_loop_wait"    : 60,
+            "event_loop_execute" : event_loop_proc.event_loop_proc({})
+        })
+    # end def
+
+    def event_listener_start():
+        global yourThread
+        listenerThread = threading.Timer(pool_time, listen_action, ())
+        listenerThread.start()
+    # end def
+
+    event_listener_start()
+    return app
+# end def
 #
 # Main app configurations
 #
-app             = Flask( __name__, config.G_STATIC_URL_PATH )
+
+app             = main_app()
 csrf            = CSRFProtect(app)
 app.secret_key  = config.G_FLASK_SECRET
 app.db_update_context, app.db_table_fks = model.get_db_table_paths(model.db)
+
 
 ########################## CALLBACK API ###################################
 
@@ -72,6 +118,7 @@ def admin_login():
     else:
         html_desc = html_resp.get("desc")
         flash( html_desc )
+        return html_desc
     # end if
 # end def
 
@@ -86,6 +133,7 @@ def dashboard():
     else:
         html_desc = html_resp.get("desc")
         flash( html_desc )
+        return html_desc
     # end if
 # end def
 

@@ -17,8 +17,6 @@ from pytavia_core import database
 from pytavia_core import config
 from pytavia_core import bulk_db_multi
 
-import dukcapil
-import slik
 
 class customer_evt_handler(pytavia_event_handler.pytavia_event_handler):
 
@@ -30,13 +28,14 @@ class customer_evt_handler(pytavia_event_handler.pytavia_event_handler):
 
     def process_customer_check(self, event):
         print ("do some action here")
+        print (event.get("data"))
     # end def
 
     def event_switch(self, event):
         pytavia_event_handler.pytavia_event_handler.event_switch( self, event)
         try:
             event_action = event.get("action")
-            if event_action == "INSERT":
+            if event_action == "UPDATE":
                 self.process_customer_check( event )
                 sys.stdout.flush()
             # end if     
