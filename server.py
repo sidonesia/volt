@@ -54,13 +54,16 @@ from flask import flash
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf.csrf import CSRFError
 
+from flask_socketio import SocketIO
+
 ########################## CREATOR FUNCTION ###################################
 
 listenerThread  = threading.Thread()
 pool_time       = 5
 
 def main_app():
-    app = Flask( __name__, config.G_STATIC_URL_PATH )
+    app      = Flask( __name__, config.G_STATIC_URL_PATH )
+    socketio = SocketIO(app)
 
     def interrupt():
         global listenerThread
@@ -68,7 +71,6 @@ def main_app():
     # end def
 
     def listen_action():
-        print ("listen_action: EXECUTE")
         pe = pytavia_events.pytavia_events({})
         pe.register_handler({
             "handler_name"       : "DASHBOARD_RT_ACCESS",
@@ -76,8 +78,6 @@ def main_app():
             "handler"            : customer_evt_handler.customer_evt_handler({}),
             "query_filter"       : []
         })
-
-        print ("event_loop: start action")
         pe.event_loop({
             "event_loop_wait"    : 60,
             "event_loop_execute" : event_loop_proc.event_loop_proc({})
@@ -91,22 +91,26 @@ def main_app():
     # end def
 
     event_listener_start()
-    return app
+    server_type = {
+        "app"       : app,
+        "socketio"  : socketio
+    }
+    return server_type
 # end def
 #
 # Main app configurations
 #
-
-app             = main_app()
+server_type     = main_app()
+app             = server_type["app"]
+socketio        = server_type["socketio"]
 csrf            = CSRFProtect(app)
 app.secret_key  = config.G_FLASK_SECRET
+
 app.db_update_context, app.db_table_fks = model.get_db_table_paths(model.db)
 
+########################## SOCKET IO  ###################################
 
-########################## CALLBACK API ###################################
-
-
-########################## HTML PAGES   ##########################
+########################## HTML PAGES ##########################
 
 @app.route('/' , methods=["GET"])
 def admin_login():
@@ -217,4 +221,8 @@ def settings_edit():
     response = config_edit.config_edit(app).execute( params )
     return redirect (url_for("admin_settings"))
 # end def
+
+if __name__ == '__main__':
+    socketio.run(app)
+# end if
 
