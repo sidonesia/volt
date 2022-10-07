@@ -4,6 +4,7 @@ import copy
 import json
 import base64
 import copy
+import time
 
 from flask import make_response
 from flask import jsonify
@@ -16,6 +17,48 @@ sys.path.append("pytavia_stdlib"  )
 sys.path.append("pytavia_storage" )
 
 from pytavia_stdlib import idgen
+
+REQUEST_EVENT  = "PYTAVIA_REQUEST_EVENT"
+RESPONSE_EVENT = "PYTAVIA_RESPONSE_EVENT"
+CMD_EVENT      = "PYTAVIA_CMD_EVENT"
+
+class event_msg:
+
+    msg = {
+        "event_type" : "",
+        "event_time" : 0 ,
+        "data"       : {}
+    }
+
+    def __init__(self, event_type, data):
+        self.msg["event_type"] = event_type
+        self.msg["event_time"] = int(time.time() * 1000)
+        self.msg["data"      ] = data
+    # end def
+
+    def put(self, key, value):
+        if not (key in self.msg):
+            raise ValueError('SETTING_NON_EXISTING_FIELD', key, value)
+        # end if
+        self.msg[key] = value
+    #end def
+
+    def get(self, key):
+        if not (key in self.msg):
+            raise ValueError('SETTING_NON_EXISTING_FIELD', key, value)
+        # end if
+        return self.msg[key]
+    # end def
+
+    def json(self):
+        return self.msg
+    # end def
+
+    def stringify(self):
+        return json.dumps(self.msg)
+    # end def
+# end class
+
 
 class response_msg:
 

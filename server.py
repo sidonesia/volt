@@ -33,7 +33,7 @@ from user                import auth_proc
 
 from configuration       import config_add
 from event_loop_executor import event_loop_proc
-from event_handler       import customer_evt_handler
+from event_handler       import dashboard_evt_handler
 
 from view import view_config_add
 from view import view_login
@@ -54,7 +54,7 @@ from flask import flash
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf.csrf import CSRFError
 
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 
 ########################## CREATOR FUNCTION ###################################
 
@@ -75,7 +75,7 @@ def main_app():
         pe.register_handler({
             "handler_name"       : "DASHBOARD_RT_ACCESS",
             "collection"         : "db_rt_dashboard",
-            "handler"            : customer_evt_handler.customer_evt_handler({}),
+            "handler"            : dashboard_evt_handler.dashboard_evt_handler({"socketio" : socketio }),
             "query_filter"       : []
         })
         pe.event_loop({
@@ -223,6 +223,7 @@ def settings_edit():
 # end def
 
 if __name__ == '__main__':
-    socketio.run(app)
+    #socketio.run(app , host="192.168.1.103", port=49000, debug=True)
+    socketio.run(app , host="192.168.1.103")
 # end if
 
