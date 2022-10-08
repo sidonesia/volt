@@ -89,6 +89,7 @@ pytavia_event_processor = function(socket_host, socket_port)
             //
             // We register the callback functiosn based on the events
             //
+	    console.log( event_name , callback_func ) 
             socket.on(  event_name,  callback_func  )
         }
     } 
