@@ -76,84 +76,91 @@ class usage_process:
         try:
             bus_voltage = self.ina_device.voltage()
             while True:
-                power_list          = []
-                current_list        = []
-                voltage_list        = []
-                shunt_voltage_list  = []
+                try:
+                    power_list          = []
+                    current_list        = []
+                    voltage_list        = []
+                    shunt_voltage_list  = []
 
-                # get how many samples to read
-                read_config_rec     = self.mgdDB.db_config.find_one({
-                    "value"             : "SHUNT",
-                    "data.shunt_address": self.device_address 
-                })
-                read_samples        = read_config_rec["data"]["samples"]
-                capture_delay       = read_config_rec["data"]["capture_delay"]
-                shunt_voltage_drop  = read_config_rec["data"]["shunt_voltage_drop"]
-                shunt_max_amps      = read_config_rec["data"]["max_amps"]
-                amps_diff_constant  = read_config_rec["data"]["amps_diff_constant"]
-                amps_diff_threshold = read_config_rec["data"]["amps_diff_threshold"]
+                    # get how many samples to read
+                    read_config_rec     = self.mgdDB.db_config.find_one({
+                        "value"             : "SHUNT",
+                        "data.shunt_address": self.device_address 
+                    })
+                    read_samples        = read_config_rec["data"]["samples"]
+                    capture_delay       = read_config_rec["data"]["capture_delay"]
+                    shunt_voltage_drop  = read_config_rec["data"]["shunt_voltage_drop"]
+                    shunt_max_amps      = read_config_rec["data"]["max_amps"]
+                    amps_diff_constant  = read_config_rec["data"]["amps_diff_constant"]
+                    amps_diff_threshold = read_config_rec["data"]["amps_diff_threshold"]
 
-                amps_diff_constant  = int  ( amps_diff_constant  )
-                amps_diff_threshold = int  ( amps_diff_threshold )
-                amps_per_milli_volt = float( shunt_max_amps ) / float ( shunt_voltage_drop ) 
+                    amps_diff_constant  = int  ( amps_diff_constant  )
+                    amps_diff_threshold = int  ( amps_diff_threshold )
+                    amps_per_milli_volt = float( shunt_max_amps ) / float ( shunt_voltage_drop ) 
 
-                for sample in range(0, read_samples ):
-                    shunt_voltage        = self.ina_device.shunt_voltage()
-                    shunt_voltage_scaled = (shunt_voltage * amps_per_milli_volt / config.G_MILLI_UNIT )
-                    voltage              = self.ina_device.voltage() #+ shunt_voltage_scaled
-                    current              = self.ina_device.current()
+                    for sample in range(0, read_samples ):
+                        shunt_voltage        = self.ina_device.shunt_voltage()
+                        shunt_voltage_scaled = (shunt_voltage * amps_per_milli_volt / config.G_MILLI_UNIT )
+                        voltage              = self.ina_device.voltage() #+ shunt_voltage_scaled
+                        current              = self.ina_device.current()
 
-                    voltage       = round( voltage , 3 )
-                    current       = round( current , 3 )
-                    shunt_voltage = round ( shunt_voltage , 3 )
+                        voltage       = round( voltage , 3 )
+                        current       = round( current , 3 )
+                        shunt_voltage = round ( shunt_voltage , 3 )
 
-                    # dont take into consideration any negative current flows 
-                    # dont take into consideration any negative shunt voltages
-                    if ( current > 0 ) and ( shunt_voltage > 0 ):
-                        watts = voltage * current
-                        power_list.append  ( watts   )
-                        current_list.append( current )
-                        voltage_list.append( voltage )
-                        shunt_voltage_list.append( shunt_voltage )
+                        # dont take into consideration any negative current flows 
+                        # dont take into consideration any negative shunt voltages
+                        if ( current > 0 ) and ( shunt_voltage > 0 ):
+                            watts = voltage * current
+                            power_list.append  ( watts   )
+                            current_list.append( current )
+                            voltage_list.append( voltage )
+                            shunt_voltage_list.append( shunt_voltage )
+                        # end if
+                        sleep ( float( capture_delay ) )
+                    # end for
+
+                    # get all the collected data and process
+                    voltage_avg         = (sum(voltage_list) / len( voltage_list ))
+                    shunt_voltage_avg   = (sum(shunt_voltage_list) / len( shunt_voltage_list ))
+                    amp_avg             = (sum(current_list) / len(current_list) / config.G_MILLI_UNIT)
+                    # 
+                    # Some notes:
+                    #   When the amps drawn is greater then 10amps the shunt & amps reading 
+                    #   always has a 4 amps difference in reading from the battery meter.
+                    #
+                    # However:
+                    #   When the reading is below 10 amps , the power, voltage and amps matches 
+                    #   the battery meter. Don't know why so hard coding this for now
+                    #   need to see if there is a generalised reason why this is happening
+                    #       ANNOYING but this will do for now :(
+                    #
+                    if amp_avg > amps_diff_threshold:
+                        amp_avg = amp_avg - amps_diff_constant 
                     # end if
-                    sleep ( float( capture_delay ) )
-                # end for
-
-                # get all the collected data and process
-                voltage_avg         = (sum(voltage_list) / len( voltage_list ))
-                shunt_voltage_avg   = (sum(shunt_voltage_list) / len( shunt_voltage_list ))
-                amp_avg             = (sum(current_list) / len(current_list) / config.G_MILLI_UNIT)
-                # 
-                # Some notes:
-                #   When the amps drawn is greater then 10amps the shunt & amps reading 
-                #   always has a 4 amps difference in reading from the battery meter.
-                #
-                # However:
-                #   When the reading is below 10 amps , the power, voltage and amps matches 
-                #   the battery meter. Don't know why so hard coding this for now
-                #   need to see if there is a generalised reason why this is happening
-                #       ANNOYING but this will do for now :(
-                #
-                if amp_avg > amps_diff_threshold:
-                    amp_avg = amp_avg - amps_diff_constant 
-                # end if
-                power_avg       = voltage_avg * amp_avg
-                write_response  = self.write_usage({
-                    "power"         : power_avg,
-                    "voltage"       : voltage_avg,
-                    "shunt_voltage" : shunt_voltage_avg,
-                    "current"       : amp_avg
-                })
-                write_status_code = write_response.get("status_code")
-                if write_status_code != "0000":
-                    # write to the error database 
-                    pass
-                # end if
-                print ( "" )
-                print ( "voltage: " + str(voltage_avg) ) 
-                print ( "shunt: " + str(shunt_voltage_avg) ) 
-                print ( "current: " + str(amp_avg) ) 
-                print ( "watts: " + str( power_avg ) )
+                    power_avg       = voltage_avg * amp_avg
+                    write_response  = self.write_usage({
+                        "power"         : power_avg,
+                        "voltage"       : voltage_avg,
+                        "shunt_voltage" : shunt_voltage_avg,
+                        "current"       : amp_avg
+                    })
+                    write_status_code = write_response.get("status_code")
+                    if write_status_code != "0000":
+                        # write to the error database 
+                        pass
+                    # end if
+                    print ( "" )
+                    print ( "voltage: " + str(voltage_avg) ) 
+                    print ( "shunt: " + str(shunt_voltage_avg) ) 
+                    print ( "current: " + str(amp_avg) ) 
+                    print ( "watts: " + str( power_avg ) )
+                except:
+                    exception = traceback.format_exc()
+                    print( exception )
+                    print( "KEEP READING DATA" )
+                    print( "---------------------------------------------------------" )
+                # end try
             # end while
         except:
             exception = traceback.format_exc()

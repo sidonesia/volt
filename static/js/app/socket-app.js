@@ -50,7 +50,26 @@ $( document ).ready(
 
 callback_cmd_event = function( msg )
 {
-	console.log( msg );
+	event_type = msg.event_type
+	if (event_type  == "EVENT_UPDATE_DASHBOARD")
+	{
+		var msg_data 	    = msg.data
+		var current 	    = msg_data.current
+		var battery_voltage = msg_data.battery_voltage
+		var power 	    = msg_data.power
+		var battery_soc     = msg_data.battery_soc
+		var hourly_kwh      = msg_data.hourly_kwh
+		var hourly_amph     = msg_data.hourly_amph
+		var shunt_voltage   = msg_data.shunt_voltage
+
+		$("#ampere_id"	     ).html( current )
+		$("#power_id"	     ).html( power   )
+		$("#battery_volt_id" ).html( battery_voltage )
+		$("#id_battery_soc"  ).html( battery_soc )
+		$("#hourly_kwh_id"   ).html( hourly_kwh )
+		$("#amp_hour_id"     ).html( hourly_amph )
+		$("#shunt_voltage_id").html( shunt_voltage )
+	}
 };
 
 callback_draw_data = function( msg )

@@ -46,7 +46,7 @@
               <div class="con-division">
                 <span class="d-block op-5">Home Usage</span>
 		<h3 class="font-weight-bold text-white">
-			<span id="home_usage_id">{{avg_power_hourly}}</span> kWh                                            
+			<span id="hourly_kwh_id">{{avg_power_hourly}}</span> Wh
               </div>
               <svg class="con-division" id="home-icon" width="114" height="114" viewBox="0 0 114 114" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle class="border-1" cx="57" cy="57" r="57" fill="url(#paint0_linear_1_23)"/>
@@ -78,7 +78,7 @@
             </div>
           </div>        
           <div class="text-center">
-            <p class="mb-1 op-5">Use battery power</p>
+            <p class="mb-1 op-5">Use Direct Charger</p>
             <input class="d-none" id="battery-power" type="checkbox">
             <label for="battery-power" class="d-flex align-items-center gap-1 justify-content-center">
               <span>On</span>
@@ -108,42 +108,52 @@
           <div class="">
             <span class="d-block tx-24 font-weight-bold">
 		  <span class="d-block tx-24 font-weight-bold">
-			  <span id="ampere_image_id">{{dashboard_item.current_usage_out}}</span> A
+			  <span id="amp_hour_id">{{dashboard_item.current_usage_out}}</span> A
 		  </span>
 	    </span>
-            <span class="d-block op-5">Amp. hour</span>
+            <span class="d-block op-5">Amps / hour</span>
           </div>
         </div>                                                                                                                                                                                                   
       </div>                
       <div class="bg-tertiary rounded-10 p-3 mt-3">                  
         <div class="row text-center">
           <div class="col-6">
-            <span class="d-block tx-24 font-weight-bold">34ºC</span>
-            <span class="d-block op-5">Temp.</span>
+            <span class="d-block tx-20 font-weight-bold">
+		    <span id="shunt_voltage_id" >
+	    		0
+		    </span>
+	    </span>
+            <span class="d-block op-5">Shunt</span>
           </div>
           <div class="col-6">
-            <span class="d-block tx-24 font-weight-bold">
-		  <span class="d-block tx-24 font-weight-bold">
-			  <span id="ampere_id">{{dashboard_item.battery_voltage}}</span> V
+            <span class="d-block tx-20 font-weight-bold">
+		  <span class="d-block tx-20 font-weight-bold">
+			  <span id="battery_volt_id">
+				  {{dashboard_item.battery_voltage}}
+			  </span> V
 		  </span>
 	    </span>
             <span class="d-block op-5">Volts</span>
           </div>
           <div class="col-6 mt-3">
-		  <span class="d-block tx-24 font-weight-bold">
-			  <span id="ampere_id">{{dashboard_item.current_usage_out}}</span> A
+		  <span class="d-block tx-20 font-weight-bold">
+			  <span id="ampere_id">
+				  {{dashboard_item.current_usage_out}}
+			  </span> A
 		  </span>
             <span class="d-block op-5">Ampere</span>
           </div>
           <div class="col-6 mt-3">
-            <span class="d-block tx-24 font-weight-bold">
-		  <span class="d-block tx-24 font-weight-bold">
-			  <span id="power_id">{{dashboard_item.power_usage_out}}</span> W
+            <span class="d-block tx-20 font-weight-bold">
+		  <span class="d-block tx-20 font-weight-bold">
+			  <span id="power_id">
+				  {{dashboard_item.power_usage_out}}
+			  </span> W
 		  </span>
 	    </span>
             <span class="d-block op-5">Watt</span>
           </div>
-        </div>                                                                                                                                                                                                
+        </div>
       </div>                
     </div>  
     <div class="col-12">
@@ -181,7 +191,7 @@
                   <span class="round mt-1" style="--color:#4678FF"></span>
                   <div class="">
                     <span class="d-block op-5">Home Usage</span>
-                    <span class="d-block tx-20">39.7 kWh</span>
+                    <span class="d-block tx-20">39.7 Wh</span>
                   </div>
                 </div>
                 <div class="d-flex gap-1">
