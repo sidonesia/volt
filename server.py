@@ -62,8 +62,9 @@ listenerThread  = threading.Thread()
 pool_time       = 5
 
 def main_app():
-    app      = Flask( __name__, config.G_STATIC_URL_PATH )
-    socketio = SocketIO(app)
+    app          = Flask( __name__, config.G_STATIC_URL_PATH )
+    socketio     = SocketIO(app)
+    mgd_database = database.get_db_conn( config.mainDB )
 
     def interrupt():
         global listenerThread
@@ -75,7 +76,9 @@ def main_app():
         pe.register_handler({
             "handler_name"       : "DASHBOARD_RT_ACCESS",
             "collection"         : "db_rt_dashboard",
-            "handler"            : dashboard_evt_handler.dashboard_evt_handler({"socketio" : socketio }),
+            "handler"            : dashboard_evt_handler.dashboard_evt_handler({
+                "socketio" : socketio 
+            }),
             "query_filter"       : []
         })
         pe.event_loop({
@@ -89,6 +92,11 @@ def main_app():
         listenerThread = threading.Timer(pool_time, listen_action, ())
         listenerThread.start()
     # end def
+
+    mgd_database.db_config.update_one(
+        { "value" : "GPIO_SETUP" },
+        { "$set"  : { "data.gpio_setup_boolean" : 0 }}
+    )
 
     event_listener_start()
     server_type = {
