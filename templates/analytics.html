@@ -1,0 +1,184 @@
+{% extends '/core/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block styles %}{% endblock %}
+
+{% block contents %}
+<div class="container pd-x-0">
+  <nav aria-label="breadcrumb" class="mg-b-10">
+    <ol class="breadcrumb breadcrumb-style1 mg-b-0">
+      <li class="breadcrumb-item active" aria-current="page">Home</li>
+    </ol>
+  </nav>
+    <div class="col-12">
+      <div class="mt-3">
+        <span class="d-block op-5">Reports</span>
+        <div class="bg-tertiary p-4 rounded-10 mt-2">
+          <div class="row">
+            <div class="col-md-2">                    
+              <nav>
+                <ul class="report-btn p-2 rounded bg-primary-1">
+                  <li>
+                    <button class="report-btn__active">Day</button>
+                  </li>
+                  <li>
+                    <button>Week</button>
+                  </li>
+                  <li>
+                    <button>Month</button>
+                  </li>
+                  <li>
+                    <button>Year</button>
+                  </li>
+                  <li>
+                    <button>Lifetime</button>
+                  </li>                            
+                </ul>
+              </nav>
+            </div>
+            <div class="col-md-8">
+              <canvas id="myChart"></canvas>
+            </div>
+            <div class="col-md-2">
+              <div class="d-flex gap-1 mt-4 mt-md-0 flex-wrap">
+                <div class="d-flex gap-1">
+                  <span class="round mt-1" style="--color:#4678FF"></span>
+                  <div class="">
+                    <span class="d-block op-5">Home Usage</span>
+                    <span class="d-block tx-20">39.7 Wh</span>
+                  </div>
+                </div>
+                <div class="d-flex gap-1">
+                  <span class="round mt-1" style="--color:#00C2FF"></span>
+                  <div class="">
+                    <span class="d-block op-5">Battery Usage</span>
+                    <span class="d-block tx-20">20.2 kWh</span>
+                  </div>
+                </div>
+                <div class="d-flex gap-1">
+                  <span class="round mt-1" style="--color:#EB714A"></span>
+                  <div class="">
+                    <span class="d-block op-5">Solar Generated</span>
+                    <span class="d-block tx-20">41.9 kWh</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <!-- row -->
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/lib/anseki-leader-line-1.0.7-4-g6c26a9d/anseki-leader-line-6c26a9d/leader-line.min.js"></script>        
+<script src="/static/lib/chartjs-new/chart.min.js"></script>
+<script src="/static/js/dashboard-chart.js"></script>
+<script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+<script src="/static/js/pytavia_js_lib/socket_events.js" type="text/javascript"></script>
+<script src="/static/js/app/socket-app.js"               type="text/javascript"></script>
+
+<script>   
+  var batToHome
+  const batteryIcon = document.getElementById('battery-icon')
+  const homeIcon    = document.getElementById('home-icon')
+  const solarIcon   = document.getElementById('solar-panel-icon')
+  const lineConfig = {
+    gradient: {
+      startColor: '#EB714A',
+      endColor: '#4678FF'
+    },
+    endPlug: 'behind',
+    size: 2,
+  }      
+  const solarToHome = new LeaderLine(
+    solarIcon,
+    homeIcon, 
+    {          
+      ...lineConfig,
+      startSocket: 'left',
+      endSocket: 'top',                    
+      dash: {animation: true},         
+    }
+  );      
+  
+  const solarToBat = new LeaderLine(
+    document.getElementById('solar-panel-icon'),
+    document.getElementById('battery-icon'), 
+    {                    
+      ...lineConfig,
+      startSocket: 'right',
+      endSocket: 'top',
+      dash: {animation: true},
+    }
+  )  
+
+  $('#force_battery_charging_id').on('change', function () { checkSwitch(this,"force_battery_charging_id") })
+  $('#smart_battery_charging_id').on('change', function () { checkSwitch(this,"smart_battery_charging_id") })
+    
+             
+  document.querySelector('.content-body').addEventListener('scroll', function() {
+    repositionLines()
+  }, false);
+
+  $('.aside-menu-link').on('click', () =>{ repositionLines() }, false)    
+  
+  document.querySelector('.aside-menu-link').addEventListener('click', function() {
+    repositionLines()
+  })
+
+  function repositionLines() {
+    solarToHome.position();
+    solarToBat.position();
+    batToHome.position();
+  }
+
+  function checkSwitch(el, id_val) {
+    if(el.checked) {
+      //$('.switch').removeClass('switch__off')
+      $('.' + id_val).removeClass('switch__off')
+      $('[data-charge-span]').addClass('percentage-span__using')
+      $('[data-battery]').css('fill', 'white').removeClass('animated slower flash')
+      batToHome.remove()
+      batToHome = new LeaderLine(
+        batteryIcon,
+        homeIcon, {                                     
+          dash: {animation: true},
+          ...lineConfig,
+        }
+      );
+    }else{
+      //$('.switch').addClass('switch__off')
+      $('.' + id_val).addClass('switch__off')
+      $('[data-charge-span]').removeClass('percentage-span__using')
+      $('[data-battery]').css('fill', '#00C2FF').addClass('animated slower flash')
+      if(batToHome) batToHome.remove()
+      batToHome = new LeaderLine(
+        batteryIcon,
+        homeIcon, {         
+          ...lineConfig,
+        }
+      );   
+    }        
+  }    
+
+  function setBorderPercentage() {
+    $('[data-percentage]').each(function() {
+      const percentage = $(this).attr('data-percentage')
+      const min = $(this).attr('data-min')
+      const max = $(this).attr('data-max')
+      const offset =  max - percentage / 100 * min
+      $(this).css('stroke-dashoffset', offset)
+    })
+  }
+
+  checkSwitch(document.getElementById('force_battery_charging_id'),"force_battery_charging_id")    
+  checkSwitch(document.getElementById('smart_battery_charging_id'),"smart_battery_charging_id")    
+  setBorderPercentage()    
+  
+</script>
+{% endblock %}

@@ -31,6 +31,8 @@ from rest_api_controller import module1
 from user                import register_proc
 from user                import auth_proc
 
+from control             import battery_charge_process
+
 from configuration       import config_add
 from event_loop_executor import event_loop_proc
 from event_handler       import dashboard_evt_handler
@@ -39,6 +41,7 @@ from view import view_config_add
 from view import view_login
 from view import view_dashboard
 from view import view_history
+from view import view_analytics
 
 ##########################################################
 
@@ -61,6 +64,9 @@ from flask_socketio import SocketIO, emit
 listenerThread  = threading.Thread()
 pool_time       = 5
 
+#
+# Init some actions before the main app is initialised
+#
 def main_app():
     app          = Flask( __name__, config.G_STATIC_URL_PATH )
     socketio     = SocketIO(app)
@@ -92,12 +98,17 @@ def main_app():
         listenerThread = threading.Timer(pool_time, listen_action, ())
         listenerThread.start()
     # end def
-
-    mgd_database.db_config.update_one(
-        { "value" : "GPIO_SETUP" },
-        { "$set"  : { "data.gpio_setup_boolean" : 0 }}
-    )
-
+    config_rec = mgd_database.db_config.find_one({
+        "value" : config.G_GPIO_BATTERY_CHARGE_SETUP
+    })
+    if config_rec != None:
+        mgd_database.db_config.update_one(
+            { "value" : config.G_GPIO_BATTERY_CHARGE_SETUP },
+            { "$set"  : { 
+                "data.gpio_setup_state" : config.G_GPIO_BATTERY_CHARGE_STATE_FALSE
+            }}
+        )
+    # end if
     event_listener_start()
     server_type = {
         "app"       : app,
@@ -177,7 +188,35 @@ def admin_history():
     # end if
 # end def
 
+@app.route('/user/analytics' , methods=["GET"])
+@server_lib.logged_in()
+def admin_analytics():
+    html_resp           = view_analytics.view_analytics(app).html({})
+    html_status_code    = html_resp.get("status_code")
+    if html_status_code == "0000":
+        html = html_resp.get("data")["html"]
+        return html
+    else:
+        html_desc = html_resp.get("desc")
+        flash( html_desc )
+    # end if
+# end def
+
 ########################## PROCESSORS ##########################
+
+#### API  PROCESSORS
+
+@app.route('/api/force-battery-charging',methods=["GET"])
+def force_battery_charging():
+    params = request.args.to_dict()
+
+    print ( "----------------------------------------" )
+    print ( params )
+    print ( "----------------------------------------" )
+
+    response = battery_charge_process.battery_charge_process(app).execute( params )
+    return response.http_stringify()
+# end def
 
 #### AUTH PROCESSORS
 

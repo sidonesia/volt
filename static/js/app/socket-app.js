@@ -48,6 +48,11 @@ $( document ).ready(
     }
 );
 
+callback_draw_data = function( msg )
+{
+	console.log( msg );
+};
+
 callback_cmd_event = function( msg )
 {
 	event_type = msg.event_type
@@ -72,10 +77,44 @@ callback_cmd_event = function( msg )
 	}
 };
 
-callback_draw_data = function( msg )
+process_request = function(function_type , switch_flag)
 {
-	console.log( msg );
+        if (function_type  == "force_battery_charging_id")
+        {
+                force_battery_charge(switch_flag);
+        }
+        if (function_type  == "smart_battery_charging_id")
+        {
+                smart_battery_charge(switch_flag);
+        }
 };
+
+force_battery_charge = function( switch_flag )
+{
+        AJAX_SERVER_call(
+                force_battery_charge_callback,
+                "GET",
+                "/api/force-battery-charging",
+                {
+                        "battery_status"     : switch_flag,
+                        "battery_status_pid" : "BCS001"
+                },
+                true
+        );
+}
+
+force_battery_charge_callback = function( msg )
+{
+        console.log( msg );
+}
+
+smart_battery_charge = function( function_type, switch_flag )
+{
+}
+
+smart_battery_charge_callback = function( function_type, switch_flag )
+{
+}
 
 AJAX_SERVER_call = function(callback_func, method, wservice, uri, bool)
 {
@@ -101,4 +140,3 @@ AJAX_SERVER_call = function(callback_func, method, wservice, uri, bool)
                 }
         );
 };
-

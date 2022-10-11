@@ -155,6 +155,17 @@ db = {
         "misc"                          : {},
         "data"                          : {},
     },
+    "db_rt_device_state"                : {
+        "name"                          : "",
+        "value"                         : "", # unqiue name to search by
+        "type"                          : "", # type , digital / analog / both
+        "desc"                          : "", # description of the device
+        "pid_code"                      : "", # unique code for this device 
+        "digital_state"                 : 0 , # digital state of this device
+        "analog_state"                  : 0 , # analog state of this device
+        "last_update"                   : 0 ,
+        "data"                          : {}, # any additional data
+    },
     "db_rt_dashboard"                   : {
         "power_usage_out"               : 0 ,
         "power_solar_panel_in"          : 0 ,

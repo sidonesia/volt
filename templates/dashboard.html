@@ -78,11 +78,21 @@
             </div>
           </div>        
           <div class="text-center">
-            <p class="mb-1 op-5">Use Direct Charger</p>
-            <input class="d-none" id="battery-power" type="checkbox">
-            <label for="battery-power" class="d-flex align-items-center gap-1 justify-content-center">
+            <p class="mb-1 op-5">Force Mains Battery Charging</p>
+            <input class="d-none" id="force_battery_charging_id" type="checkbox">
+            <label for="force_battery_charging_id" class="d-flex align-items-center gap-1 justify-content-center">
               <span>On</span>
-              <div class="switch">
+              <div class="switch force_battery_charging_id">
+                <span class="switch__light"></span>
+              </div>
+              <span>Off</span>
+            </div>
+          <div class="text-center">
+            <p class="mb-1 op-5">Smart Battery Charging</p>
+            <input class="d-none" id="smart_battery_charging_id" type="checkbox">
+            <label for="smart_battery_charging_id" class="d-flex align-items-center gap-1 justify-content-center">
+              <span>On</span>
+              <div class="switch smart_battery_charging_id">
                 <span class="switch__light"></span>
               </div>
               <span>Off</span>
@@ -153,67 +163,11 @@
 	    </span>
             <span class="d-block op-5">Watt</span>
           </div>
-        </div>
+
+	<!--------------------------------------------!>
+
       </div>                
     </div>  
-    <div class="col-12">
-      <div class="mt-3">
-        <span class="d-block op-5">Reports</span>
-        <div class="bg-tertiary p-4 rounded-10 mt-2">
-          <div class="row">
-            <div class="col-md-2">                    
-              <nav>
-                <ul class="report-btn p-2 rounded bg-primary-1">
-                  <li>
-                    <button class="report-btn__active">Day</button>
-                  </li>
-                  <li>
-                    <button>Week</button>
-                  </li>
-                  <li>
-                    <button>Month</button>
-                  </li>
-                  <li>
-                    <button>Year</button>
-                  </li>
-                  <li>
-                    <button>Lifetime</button>
-                  </li>                            
-                </ul>
-              </nav>
-            </div>
-            <div class="col-md-8">
-              <canvas id="myChart"></canvas>
-            </div>
-            <div class="col-md-2">
-              <div class="d-flex gap-1 mt-4 mt-md-0 flex-wrap">
-                <div class="d-flex gap-1">
-                  <span class="round mt-1" style="--color:#4678FF"></span>
-                  <div class="">
-                    <span class="d-block op-5">Home Usage</span>
-                    <span class="d-block tx-20">39.7 Wh</span>
-                  </div>
-                </div>
-                <div class="d-flex gap-1">
-                  <span class="round mt-1" style="--color:#00C2FF"></span>
-                  <div class="">
-                    <span class="d-block op-5">Battery Usage</span>
-                    <span class="d-block tx-20">20.2 kWh</span>
-                  </div>
-                </div>
-                <div class="d-flex gap-1">
-                  <span class="round mt-1" style="--color:#EB714A"></span>
-                  <div class="">
-                    <span class="d-block op-5">Solar Generated</span>
-                    <span class="d-block tx-20">41.9 kWh</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
     <!-- row -->
 </div>
@@ -221,11 +175,12 @@
 
 {% block scripts %}
 <script src="/static/lib/anseki-leader-line-1.0.7-4-g6c26a9d/anseki-leader-line-6c26a9d/leader-line.min.js"></script>        
+<script src="/static/js/app/dashboard.js"  type="text/javascript"></script>
 <script src="/static/lib/chartjs-new/chart.min.js"></script>
 <script src="/static/js/dashboard-chart.js"></script>
 <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
 <script src="/static/js/pytavia_js_lib/socket_events.js" type="text/javascript"></script>
-<script src="/static/js/app/socket-app.js"               type="text/javascript"></script>
+<script src="/static/js/app/socket-app.js" type="text/javascript"></script>
 
 <script>   
   var batToHome
@@ -262,7 +217,8 @@
     }
   )  
 
-  $('#battery-power').on('change', function () { checkSwitch(this) })
+  $('#force_battery_charging_id').on('change', function () { checkSwitch(this,"force_battery_charging_id") })
+  $('#smart_battery_charging_id').on('change', function () { checkSwitch(this,"smart_battery_charging_id") })
     
              
   document.querySelector('.content-body').addEventListener('scroll', function() {
@@ -281,9 +237,12 @@
     batToHome.position();
   }
 
-  function checkSwitch(el) {
-    if(el.checked) {
-      $('.switch').removeClass('switch__off')
+  function checkSwitch(el, id_val) 
+  {
+    var status_click = 1;
+    if(el.checked) 
+    {
+      $('.' + id_val).removeClass('switch__off')
       $('[data-charge-span]').addClass('percentage-span__using')
       $('[data-battery]').css('fill', 'white').removeClass('animated slower flash')
       batToHome.remove()
@@ -294,8 +253,11 @@
           ...lineConfig,
         }
       );
-    }else{
-      $('.switch').addClass('switch__off')
+    }
+    else
+    {
+      var status_click = 0;
+      $('.' + id_val).addClass('switch__off')
       $('[data-charge-span]').removeClass('percentage-span__using')
       $('[data-battery]').css('fill', '#00C2FF').addClass('animated slower flash')
       if(batToHome) batToHome.remove()
@@ -306,6 +268,8 @@
         }
       );   
     }        
+    process_request( id_val , status_click )
+    console.log ( process_request);
   }    
 
   function setBorderPercentage() {
@@ -318,7 +282,8 @@
     })
   }
 
-  checkSwitch(document.getElementById('battery-power'))    
+  checkSwitch(document.getElementById('force_battery_charging_id'),"force_battery_charging_id")    
+  checkSwitch(document.getElementById('smart_battery_charging_id'),"smart_battery_charging_id")    
   setBorderPercentage()    
   
 </script>
