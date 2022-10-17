@@ -63,124 +63,92 @@ class smart_changing_process:
 		try:
 			while True:
 				try:
-					tm_resp = self.time_gen({})
-					tm_data = tm_resp.get("data")
-					year_month_date_hour    = tm_data["year_month_date_hour"]
-					clock_hour     	        = tm_data["hour"]
-					clock_minute   	        = tm_data["minute"]
-					clock_day      	        = tm_data["day"]
-					usage_hourly_log_rec    = self.mgdDB.db_usage_hourly_log.find_one({
-						"year_month_date_hour" : year_month_date_hour
-					})
-					hourly_voltage          = usage_hourly_log_rec["avg_voltage"]
-					config_tm_rec           = self.mgdDB.db_config.find_one({
+					config_view  = self.mgdDB.db_config.find({
 						"value" : config.G_CHARGING_TIME_TRIGGER
 					})
-					config_rec  = self.mgdDB.db_config.find_one({
-						"value" : config.G_GPIO_BATTERY_CHARGE_SETUP
-					})
-					threshold_data          = config_tm_rec["data"]
-					gpio_status             = config_rec["data"]["gpio_setup_state"]
-					gpio_battery_charge_pin = config_rec["data"]["battery_charge_pin"]
-					battery_charge_state    = GPIO.input( gpio_battery_charge_pin )
+					for config_tm_rec in config_view:
+						tm_resp = self.time_gen({})
+						tm_data = tm_resp.get("data")
+						year_month_date_hour    = tm_data["year_month_date_hour"]
+						clock_hour     	        = tm_data["hour"]
+						clock_minute   	        = tm_data["minute"]
+						clock_day      	        = tm_data["day"]
+						usage_hourly_log_rec    = self.mgdDB.db_usage_hourly_log.find_one({
+							"year_month_date_hour" : year_month_date_hour
+						})
+						hourly_voltage          = usage_hourly_log_rec["avg_voltage"]
+						config_rec  = self.mgdDB.db_config.find_one({
+							"value" : config.G_GPIO_BATTERY_CHARGE_SETUP
+						})
+						gpio_status             = config_rec["data"]["gpio_setup_state"]
+						gpio_battery_charge_pin = config_rec["data"]["battery_charge_pin"]
+						battery_device_pid   	= config_rec["data"]["battery_device_pid"]
+						battery_charge_state    = GPIO.input( gpio_battery_charge_pin )
 				
-					#   we can use this one to float during the day so that when the sun is up and down
-					#		it never goes back to the mains and has to wait till we reach 13.5 volts to 
-					#		use the battery again so maintain the voltage here between 
-					#		12.6 to 12.9 volts (at 12.9 volts it will stop the charger)	
-					#
-					# - if we are in a given time range and we hit the lower threshold 
-					#	we will start the charger if the auto charger is off
-					#
-					# - if we are during the day then we need to keep balance to make sure it stays on 
-					#	batteries once it hits the top limit and we still in this time range
-					#   and if charging is still happening then we need to stop the charging
-					#   process
-					#
-					lower_bottom_threshold  = threshold_data["lower_bottom_threshold"]
-					lower_top_threshold     = threshold_data["lower_top_threshold"]
-					lower_threshold_start   = threshold_data["lower_threshold_start_tm_range"]
-					lower_threshold_end     = threshold_data["lower_threshold_end_tm_range"]
+						threshold_data          = config_tm_rec ["data"]
+						lower_bottom_threshold  = threshold_data["lower_bottom_threshold"]
+						lower_top_threshold     = threshold_data["lower_top_threshold"]
+						lower_threshold_start   = threshold_data["lower_threshold_start_tm_range"]
+						lower_threshold_end     = threshold_data["lower_threshold_end_tm_range"]
 
-					print ("=== --- ===")
-					print ( "lower_bottom_threshold :" + str(lower_bottom_threshold) + " " + str(type( lower_bottom_threshold)))
-					print ( "lower_top_threshold :" + str(lower_top_threshold)  + " " + str(type( lower_top_threshold) ))
-					print ( "lower_threshold_start :" + str(lower_threshold_start)  + " " + str(type( lower_threshold_start)) )
-					print ( "lower_threshold_end :" + str(lower_threshold_end)  + " " + str(type( lower_threshold_end) ))
-					print ( "hourly_voltage :" + str(hourly_voltage)  + " " + str(type( hourly_voltage) ))
-					print ( "hour :" + str(clock_hour)  + " " + str(type( clock_hour) ))
-					print ( "minute :" + str(clock_minute)  + " " + str(type( clock_minute) ))
-					print ( "day :" + str(clock_day)  + " " + str(type( clock_day) ))
-					print ( "battery_charge_state :" + str(battery_charge_state)  + " " + str(type( battery_charge_state) ))
+						print ("=== --- ===")
+						print ( "lower_bottom_threshold :" + str(lower_bottom_threshold) + " " + str(type( lower_bottom_threshold)))
+						print ( "lower_top_threshold :" + str(lower_top_threshold)  + " " + str(type( lower_top_threshold) ))
+						print ( "lower_threshold_start :" + str(lower_threshold_start)  + " " + str(type( lower_threshold_start)) )
+						print ( "lower_threshold_end :" + str(lower_threshold_end)  + " " + str(type( lower_threshold_end) ))
+						print ( "hourly_voltage :" + str(hourly_voltage)  + " " + str(type( hourly_voltage) ))
+						print ( "hour :" + str(clock_hour)  + " " + str(type( clock_hour) ))
+						print ( "minute :" + str(clock_minute)  + " " + str(type( clock_minute) ))
+						print ( "day :" + str(clock_day)  + " " + str(type( clock_day) ))
+						print ( "battery_charge_state :" + str(battery_charge_state)  + " " + str(type( battery_charge_state) ))
+						print ( "battery_device_pid :" + str(battery_device_pid)  + " " + str(type( battery_device_pid) ))
 					
 
-					if battery_charge_state == config.G_BATTERY_CHARGE_OFF:
-						if clock_hour > lower_threshold_start and clock_hour < lower_threshold_end:
-							if hourly_voltage < lower_bottom_threshold:
-								GPIO.output( gpio_battery_charge_pin , config.G_BATTERY_CHARGE_ON  )  
-								print ( "=====------------------------------=====" )
-								print ( "=====----- TURNING ON CHARGER -----=====" )
-								print ( "voltage: " + str( hourly_voltage 		  ))
-								print ( "lower:   " + str( lower_bottom_threshold ))
-								print ( "start_tm:" + str( lower_threshold_start  ))
-								print ( "end_tm:  " + str( lower_threshold_end    ))
-								print ( "=====------------------------------=====" )
-							# end if
-					# end if
-					if battery_charge_state == config.G_BATTERY_CHARGE_ON:
-						if clock_hour > lower_threshold_start and clock_hour < lower_threshold_end:
-							if hourly_voltage >= lower_top_threshold:
-								GPIO.output( gpio_battery_charge_pin , config.G_BATTERY_CHARGE_OFF )
-								print ( "=====-------------------------------=====" )
-								print ( "=====----- TURNING OFF CHARGER -----=====" )
-								print ( "voltage: " + str( hourly_voltage 		   ))
-								print ( "lower:   " + str( lower_bottom_threshold  ))
-								print ( "start_tm:" + str( lower_threshold_start   ))
-								print ( "end_tm:  " + str( lower_threshold_end     ))
-								print ( "=====-------------------------------=====" )
-                            # end if
-                    # end if
-                    #
-					# This one we use if the system has switched to mains, we wait till it 
-					# 	switch to mains and once it does , we keep it charging until it hits the mains
-					#	switch back , once it hits that , we switch the power off 
-					#
-					# maintain the voltage here from 11.9 volts to 13.4
-					#
-                    #
-
-					upper_bottom_threshold  = threshold_data["upper_bottom_threshold"]
-					upper_top_threshold     = threshold_data["upper_top_threshold"]
-					upper_threshold_start   = threshold_data["upper_threshold_start_tm_range"]
-					upper_threshold_end     = threshold_data["upper_threshold_end_tm_range"]
-					if battery_charge_state == config.G_BATTERY_CHARGE_OFF:
-						if clock_hour > upper_threshold_start and clock_hour < upper_threshold_end:
-							if hourly_voltage < upper_bottom_threshold:
-								GPIO.output( gpio_battery_charge_pin , config.G_BATTERY_CHARGE_ON  )
-								print ( "=====------------------------------=====" )
-								print ( "=====----- TURNING ON CHARGER -----=====" )
-								print ( "voltage: " + str( hourly_voltage         ))
-								print ( "lower:   " + str( upper_bottom_threshold ))
-								print ( "start_tm:" + str( upper_threshold_start  ))
-								print ( "end_tm:  " + str( upper_threshold_end    ))
-								print ( "=====------------------------------=====" )
+						if battery_charge_state == config.G_BATTERY_CHARGE_OFF:
+							if clock_hour > lower_threshold_start and clock_hour < lower_threshold_end:
+								if hourly_voltage < lower_bottom_threshold:
+									GPIO.output( gpio_battery_charge_pin , config.G_BATTERY_CHARGE_ON  )  
+									self.mgdDB.db_config.update_one(
+										{ "value" : config.G_GPIO_BATTERY_CHARGE_SETUP  } ,
+										{ "$set"  : { "data.gpio_setup_state" : config.G_GPIO_BATTERY_CHARGE_STATE_TRUE}}
+									)
+									self.mgdDB.db_rt_device_state.find_one(
+										{ "pid_code" : battery_device_pid },
+										{	 "$set"     : { "digital_state" : config.G_BATTERY_CHARGE_ON }}
+									)
+									print ( "=====------------------------------=====" )
+									print ( "=====----- TURNING ON CHARGER -----=====" )
+									print ( "voltage: " + str( hourly_voltage 		  ))
+									print ( "lower:   " + str( lower_bottom_threshold ))
+									print ( "start_tm:" + str( lower_threshold_start  ))
+									print ( "end_tm:  " + str( lower_threshold_end    ))
+									print ( "=====------------------------------=====" )
+								# end if
 							# end if
 						# end if
-					# end if
-					if battery_charge_state == config.G_BATTERY_CHARGE_ON:
-						if clock_hour > upper_threshold_start and clock_hour < upper_threshold_end:
-							if hourly_voltage >= upper_top_threshold:
-								GPIO.output( gpio_battery_charge_pin , config.G_BATTERY_CHARGE_OFF )
-								print ( "=====-------------------------------=====" )
-								print ( "=====----- TURNING OFF CHARGER -----=====" )
-								print ( "voltage: " + str( hourly_voltage          ))
-								print ( "lower:   " + str( upper_bottom_threshold  ))
-								print ( "start_tm:" + str( upper_threshold_start   ))
-								print ( "end_tm:  " + str( upper_threshold_end     ))
-								print ( "=====-------------------------------=====" )
+						if battery_charge_state == config.G_BATTERY_CHARGE_ON:
+							if clock_hour > lower_threshold_start and clock_hour < lower_threshold_end:
+								if hourly_voltage >= lower_top_threshold:
+									GPIO.output( gpio_battery_charge_pin , config.G_BATTERY_CHARGE_OFF )
+									self.mgdDB.db_config.update_one(
+										{ "value" : config.G_GPIO_BATTERY_CHARGE_SETUP  } ,
+										{ "$set"  : { "data.gpio_setup_state" : config.G_GPIO_BATTERY_CHARGE_STATE_FALSE}}
+									)
+									self.mgdDB.db_rt_device_state.find_one(
+										{ "pid_code" : battery_device_pid },
+										{ "$set"     : { "digital_state" : config.G_BATTERY_CHARGE_OFF }}
+									)
+									print ( "=====-------------------------------=====" )
+									print ( "=====----- TURNING OFF CHARGER -----=====" )
+									print ( "voltage: " + str( hourly_voltage 		   ))
+									print ( "lower:   " + str( lower_bottom_threshold  ))
+									print ( "start_tm:" + str( lower_threshold_start   ))
+									print ( "end_tm:  " + str( lower_threshold_end     ))
+									print ( "=====-------------------------------=====" )
+                            	# end if
 							# end if
-						# end if
-					# end if
+                    	# end if
+					# end for
 				except:
 					exception = traceback.format_exc()
 					print( exception )

@@ -90,17 +90,14 @@ class battery_charge_process:
                     mdl_device_state.put( "desc"          , battery_device_desc  )
                     mdl_device_state.put( "pid_code"      , battery_device_pid   )
                     mdl_device_state.put( "digital_state" , battery_status )
-                    mdl_device_state.put( "analog_state"  , 0  )
+                    mdl_device_state.put( "analog_state"  , 1  )
                     mdl_device_state.put( "last_update"   , current_tm )
                     mdl_device_state.insert()
                 else:
                     self.mgdDB.db_rt_device_state.find_one(
-                        {
-                            "value"    : battery_status,
-                            "pid_code" : battery_device_pid
-                        },
-                        { "$set"       : { "digital_state" : battery_state }}
-                )
+                        { "pid_code" : battery_device_pid },
+                        { "$set"     : { "digital_state" : battery_state }}
+                	)
                 # end if
             # end if
         except:
