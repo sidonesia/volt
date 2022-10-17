@@ -239,7 +239,7 @@
 
   function checkSwitch(el, id_val) 
   {
-    var status_click = 1;
+    var status_click = 0;
     if(el.checked) 
     {
       $('.' + id_val).removeClass('switch__off')
@@ -256,7 +256,7 @@
     }
     else
     {
-      var status_click = 0;
+      var status_click = 1;
       $('.' + id_val).addClass('switch__off')
       $('[data-charge-span]').removeClass('percentage-span__using')
       $('[data-battery]').css('fill', '#00C2FF').addClass('animated slower flash')
