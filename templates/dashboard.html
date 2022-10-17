@@ -86,7 +86,11 @@
 			{% endif %}
             <label for="force_battery_charging_id" class="d-flex align-items-center gap-1 justify-content-center">
               <span>On</span>
+			{% if force_battery_charging == "ON" %}
               <div class="switch force_battery_charging_id">
+			{% else %}
+              <div class="switch force_battery_charging_id switch__off">
+			{% endif %}
                 <span class="switch__light"></span>
               </div>
               <span>Off</span>
@@ -100,7 +104,11 @@
 			{% endif %}
             <label for="smart_battery_charging_id" class="d-flex align-items-center gap-1 justify-content-center">
               <span>On</span>
+			{% if smart_battery_charging == "ON" %}
               <div class="switch smart_battery_charging_id">
+			{% else %}
+              <div class="switch smart_battery_charging_id switch__off">
+			{% endif %}
                 <span class="switch__light"></span>
               </div>
               <span>Off</span>
