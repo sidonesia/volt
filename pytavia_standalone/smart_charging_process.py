@@ -239,7 +239,6 @@ class smart_changing_process:
 		# end def
 # end class
 
-
 if __name__ == "__main__":
     smart_changing_process({}).execute( {} )
 # end if

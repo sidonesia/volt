@@ -79,7 +79,11 @@
           </div>        
           <div class="text-center">
             <p class="mb-1 op-5">Force Mains Battery Charging</p>
-            <input class="d-none" id="force_battery_charging_id" type="checkbox">
+			{% if force_battery_charging == "ON" %}
+            	<input class="d-none" id="force_battery_charging_id" type="checkbox" checked>
+			{% else %}
+            	<input class="d-none" id="force_battery_charging_id" type="checkbox">
+			{% endif %}
             <label for="force_battery_charging_id" class="d-flex align-items-center gap-1 justify-content-center">
               <span>On</span>
               <div class="switch force_battery_charging_id">
@@ -89,7 +93,11 @@
             </div>
           <div class="text-center">
             <p class="mb-1 op-5">Smart Battery Charging</p>
-            <input class="d-none" id="smart_battery_charging_id" type="checkbox">
+			{% if smart_battery_charging == "ON" %}
+            	<input class="d-none" id="smart_battery_charging_id" type="checkbox" checked>
+			{% else %}
+            	<input class="d-none" id="smart_battery_charging_id" type="checkbox">
+			{% endif %}
             <label for="smart_battery_charging_id" class="d-flex align-items-center gap-1 justify-content-center">
               <span>On</span>
               <div class="switch smart_battery_charging_id">
