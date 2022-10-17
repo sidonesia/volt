@@ -92,16 +92,41 @@ class smart_changing_process:
 						lower_threshold_end     = threshold_data["lower_threshold_end_tm_range"]
 
 						print ("=== --- ===")
-						print ( "lower_bottom_threshold :" + str(lower_bottom_threshold) + " " + str(type( lower_bottom_threshold)))
-						print ( "lower_top_threshold :" + str(lower_top_threshold)  + " " + str(type( lower_top_threshold) ))
-						print ( "lower_threshold_start :" + str(lower_threshold_start)  + " " + str(type( lower_threshold_start)) )
-						print ( "lower_threshold_end :" + str(lower_threshold_end)  + " " + str(type( lower_threshold_end) ))
-						print ( "hourly_voltage :" + str(hourly_voltage)  + " " + str(type( hourly_voltage) ))
-						print ( "hour :" + str(clock_hour)  + " " + str(type( clock_hour) ))
-						print ( "minute :" + str(clock_minute)  + " " + str(type( clock_minute) ))
-						print ( "day :" + str(clock_day)  + " " + str(type( clock_day) ))
-						print ( "battery_charge_state :" + str(battery_charge_state)  + " " + str(type( battery_charge_state) ))
-						print ( "battery_device_pid :" + str(battery_device_pid)  + " " + str(type( battery_device_pid) ))
+
+						print ( "lower_bottom_threshold :" +\
+							str(lower_bottom_threshold) + " " +\
+								str(type( lower_bottom_threshold)))
+
+						print ( "lower_top_threshold :" +\
+							str(lower_top_threshold)  + " " +\
+								str(type( lower_top_threshold) ))
+
+						print ( "lower_threshold_start :" +\
+							str(lower_threshold_start)  + " " +\
+								str(type( lower_threshold_start)) )
+
+						print ( "lower_threshold_end :" +\
+							str(lower_threshold_end)  + " " +\
+								str(type( lower_threshold_end) ))
+
+						print ( "hourly_voltage :" +\
+							str(hourly_voltage)  + " " +\
+								str(type( hourly_voltage) ))
+
+						print ( "hour :" + str(clock_hour)  +\
+							" " + str(type( clock_hour) ))
+
+						print ( "minute :" + str(clock_minute)  +\
+							" " + str(type( clock_minute) ))
+
+						print ( "day :" + str(clock_day)  +\
+							" " + str(type( clock_day) ))
+
+						print ( "battery_charge_state :" + str(battery_charge_state)  +\
+							" " + str(type( battery_charge_state) ))
+
+						print ( "battery_device_pid :" + str(battery_device_pid)  +\
+							" " + str(type( battery_device_pid) ))
 					
 
 						if battery_charge_state == config.G_BATTERY_CHARGE_OFF:
@@ -110,7 +135,9 @@ class smart_changing_process:
 									GPIO.output( gpio_battery_charge_pin , config.G_BATTERY_CHARGE_ON  )  
 									self.mgdDB.db_config.update_one(
 										{ "value" : config.G_GPIO_BATTERY_CHARGE_SETUP  } ,
-										{ "$set"  : { "data.gpio_setup_state" : config.G_GPIO_BATTERY_CHARGE_STATE_TRUE}}
+										{ "$set"  : { 
+											"data.gpio_setup_state" : config.G_GPIO_BATTERY_CHARGE_STATE_TRUE
+										}}
 									)
 									self.mgdDB.db_rt_device_state.find_one(
 										{ "pid_code" : battery_device_pid },
@@ -132,7 +159,9 @@ class smart_changing_process:
 									GPIO.output( gpio_battery_charge_pin , config.G_BATTERY_CHARGE_OFF )
 									self.mgdDB.db_config.update_one(
 										{ "value" : config.G_GPIO_BATTERY_CHARGE_SETUP  } ,
-										{ "$set"  : { "data.gpio_setup_state" : config.G_GPIO_BATTERY_CHARGE_STATE_FALSE}}
+										{ "$set"  : { 
+											"data.gpio_setup_state" : config.G_GPIO_BATTERY_CHARGE_STATE_FALSE
+										}}
 									)
 									self.mgdDB.db_rt_device_state.find_one(
 										{ "pid_code" : battery_device_pid },
